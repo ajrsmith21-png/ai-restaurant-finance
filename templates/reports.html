@@ -1,0 +1,279 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+
+    <div class="welcome">
+        <h1>Reports & Insights</h1>
+        <p>
+            Generate operational reports, compare performance trends, and monitor long-term profitability.
+        </p>
+    </div>
+
+    <div class="top-actions">
+        <button class="action-btn">
+            Generate Report
+        </button>
+
+        <button class="action-btn">
+            Export Data
+        </button>
+    </div>
+
+</div>
+
+<!-- KPI CARDS -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-label">Weekly Sales</div>
+        <div class="stat-value">$36,420</div>
+        <div class="stat-change">
+            +8.6% from last week
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Weekly Labor %</div>
+        <div class="stat-value">26.4%</div>
+        <div class="stat-change">
+            Within target threshold
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Weekly Waste %</div>
+        <div class="stat-value">5.8%</div>
+        <div class="stat-change negative">
+            Slight increase detected
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Projected Monthly Profit</div>
+        <div class="stat-value">$42,800</div>
+        <div class="stat-change">
+            Positive operational trend
+        </div>
+    </div>
+
+</div>
+
+<!-- MAIN ANALYTICS -->
+
+<div class="content-grid">
+
+    <div class="panel">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                Performance Reporting
+            </div>
+
+            <select class="dropdown">
+                <option>This Month</option>
+                <option>Last Month</option>
+                <option>Last 90 Days</option>
+            </select>
+        </div>
+
+        <div class="chart-placeholder">
+            Reporting Charts & Forecasts Coming Soon
+        </div>
+
+    </div>
+
+    <div class="panel ai-card">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                AI Business Insights
+            </div>
+        </div>
+
+        <div class="ai-tag">
+            Predictive Analytics Active
+        </div>
+
+        <div class="ai-summary">
+            Weekly operational performance remains
+            stable overall, though waste percentages
+            continue trending upward during high-volume
+            dinner periods. Forecast modeling suggests
+            labor efficiency improvements could increase
+            projected monthly profitability by 4% to 6%
+            if afternoon staffing is optimized.
+        </div>
+
+    </div>
+
+</div>
+
+<!-- REPORT TABLE -->
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Generated Reports
+        </div>
+
+        <button class="action-btn">
+            Create New Report
+        </button>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Report Name</th>
+                <th>Date Range</th>
+                <th>Generated</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Weekly Operations Summary</td>
+                <td>Apr 21 - Apr 27</td>
+                <td>Today</td>
+                <td>
+                    <span class="status low">
+                        Complete
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Labor Efficiency Report</td>
+                <td>April 2026</td>
+                <td>Yesterday</td>
+                <td>
+                    <span class="status low">
+                        Complete
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Waste Trend Analysis</td>
+                <td>Last 30 Days</td>
+                <td>2 Days Ago</td>
+                <td>
+                    <span class="status medium">
+                        Processing
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Profitability Forecast</td>
+                <td>Q2 Projection</td>
+                <td>3 Days Ago</td>
+                <td>
+                    <span class="status low">
+                        Complete
+                    </span>
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<!-- PERFORMANCE BREAKDOWN -->
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Monthly Performance Breakdown
+        </div>
+
+        <select class="dropdown">
+            <option>2026</option>
+            <option>2025</option>
+        </select>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Month</th>
+                <th>Sales</th>
+                <th>Labor %</th>
+                <th>Waste %</th>
+                <th>Net Profit</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>January</td>
+                <td>$128,400</td>
+                <td>28%</td>
+                <td>6.1%</td>
+                <td>$32,800</td>
+                <td>
+                    <span class="status medium">
+                        Moderate
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>February</td>
+                <td>$134,200</td>
+                <td>26%</td>
+                <td>5.4%</td>
+                <td>$38,100</td>
+                <td>
+                    <span class="status low">
+                        Strong
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>March</td>
+                <td>$141,900</td>
+                <td>25%</td>
+                <td>5.1%</td>
+                <td>$41,700</td>
+                <td>
+                    <span class="status low">
+                        Excellent
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>April</td>
+                <td>$147,500</td>
+                <td>26%</td>
+                <td>5.8%</td>
+                <td>$42,800</td>
+                <td>
+                    <span class="status low">
+                        Stable
+                    </span>
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
