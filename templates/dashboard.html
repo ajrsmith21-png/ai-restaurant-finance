@@ -1,10 +1,62 @@
 <!DOCTYPE html>
-<html>
 <head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>Dashboard</title>
+    <link rel="stylesheet" href="/static/style.css">
 </head>
 <body>
-    <h1>Dashboard</h1>
-    <p>Welcome to your AI Finance Panel</p>
+
+<div class="dashboard">
+
+    <div class="topbar">
+        <h1>KitchenIQ Dashboard</h1>
+    </div>
+
+    <div class="card-grid">
+
+        <div class="card">
+            <h2>Today's Sales</h2>
+            <p>${{ sales }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Labor Cost</h2>
+            <p>${{ labor_cost }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Kitchen Waste</h2>
+            <p>${{ waste_cost }}</p>
+        </div>
+
+        <div class="card">
+            <h2>Labor %</h2>
+            <p>{{ labor_percent }}%</p>
+        </div>
+
+        <div class="card">
+            <h2>Waste %</h2>
+            <p>{{ waste_percent }}%</p>
+        </div>
+
+        <div class="card">
+            <h2>Profit Impact</h2>
+            <p>${{ profit_impact }}</p>
+        </div>
+
+    </div>
+
+    <div class="ai-box">
+        <h2>AI Daily Summary</h2>
+
+        <p>
+            Kitchen waste increased slightly during the dinner shift.
+            Labor costs remained within target range.
+        </p>
+    </div>
+
+</div>
+
 </body>
 </html>
