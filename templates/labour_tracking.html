@@ -1,0 +1,219 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+
+    <div class="welcome">
+        <h1>Labor Tracking</h1>
+        <p>
+            Analyze staffing efficiency, labor percentages, and hourly workforce performance.
+        </p>
+    </div>
+
+    <div class="top-actions">
+        <button class="action-btn">
+            Export Labor Report
+        </button>
+
+        <button class="action-btn">
+            Add Shift Data
+        </button>
+    </div>
+
+</div>
+
+<!-- KPI CARDS -->
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-label">Today's Labor %</div>
+        <div class="stat-value">27.9%</div>
+        <div class="stat-change">
+            Within acceptable range
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Total Labor Cost</div>
+        <div class="stat-value">$1,450</div>
+        <div class="stat-change negative">
+            +4.2% from yesterday
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Total Staff Hours</div>
+        <div class="stat-value">62</div>
+        <div class="stat-change">
+            Stable staffing levels
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Sales Per Labor Hour</div>
+        <div class="stat-value">$83.87</div>
+        <div class="stat-change">
+            Operational efficiency improving
+        </div>
+    </div>
+
+</div>
+
+<!-- MAIN ANALYTICS -->
+
+<div class="content-grid">
+
+    <div class="panel">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                Labor Performance Analytics
+            </div>
+
+            <select class="dropdown">
+                <option>Today</option>
+                <option>Last 7 Days</option>
+                <option>Last 30 Days</option>
+            </select>
+        </div>
+
+        <div class="chart-placeholder">
+            Labor Trend Charts Coming Soon
+        </div>
+
+    </div>
+
+    <div class="panel ai-card">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                AI Labor Insights
+            </div>
+        </div>
+
+        <div class="ai-tag">
+            Workforce Optimization Active
+        </div>
+
+        <div class="ai-summary">
+            Afternoon staffing between 2 PM and 4 PM
+            appears slightly over-scheduled relative
+            to customer traffic and hourly sales.
+            Dinner shift labor performance remained
+            efficient, with server productivity exceeding
+            projected benchmarks during peak hours.
+        </div>
+
+    </div>
+
+</div>
+
+<!-- STAFFING TABLE -->
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Hourly Labor Breakdown
+        </div>
+
+        <button class="action-btn">
+            View Full Schedule
+        </button>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Hour</th>
+                <th>Staff On Clock</th>
+                <th>Sales</th>
+                <th>Labor Cost</th>
+                <th>Sales / Labor Hr</th>
+                <th>Labor %</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>11 AM</td>
+                <td>5</td>
+                <td>$420</td>
+                <td>$110</td>
+                <td>$84</td>
+                <td>26%</td>
+                <td>
+                    <span class="status low">
+                        Efficient
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>12 PM</td>
+                <td>7</td>
+                <td>$780</td>
+                <td>$160</td>
+                <td>$111</td>
+                <td>20%</td>
+                <td>
+                    <span class="status low">
+                        Strong
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>1 PM</td>
+                <td>8</td>
+                <td>$690</td>
+                <td>$155</td>
+                <td>$86</td>
+                <td>22%</td>
+                <td>
+                    <span class="status low">
+                        Stable
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>2 PM</td>
+                <td>8</td>
+                <td>$480</td>
+                <td>$145</td>
+                <td>$60</td>
+                <td>30%</td>
+                <td>
+                    <span class="status medium">
+                        Elevated
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>3 PM</td>
+                <td>7</td>
+                <td>$350</td>
+                <td>$138</td>
+                <td>$50</td>
+                <td>39%</td>
+                <td>
+                    <span class="status high">
+                        Overstaffed
+                    </span>
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}
