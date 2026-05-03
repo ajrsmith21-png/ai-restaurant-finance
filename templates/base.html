@@ -91,6 +91,15 @@
             border:1px solid rgba(255,255,255,0.06);
             border-radius:18px;
             padding:18px;
+            display:flex;
+            align-items:center;
+            justify-content:space-between;
+            gap:14px;
+        }
+
+        .user-info{
+            display:flex;
+            flex-direction:column;
         }
 
         .user-name{
@@ -101,6 +110,27 @@
         .user-role{
             color:#94a3b8;
             font-size:14px;
+        }
+
+        .logout-btn{
+            width:42px;
+            height:42px;
+            border-radius:12px;
+            background:#111827;
+            border:1px solid rgba(255,255,255,0.06);
+            color:#cbd5e1;
+            display:flex;
+            align-items:center;
+            justify-content:center;
+            transition:0.2s;
+            flex-shrink:0;
+            text-decoration:none;
+        }
+
+        .logout-btn:hover{
+            background:#6366f1;
+            color:white;
+            transform:translateY(-1px);
         }
 
         /* MAIN */
@@ -408,8 +438,23 @@
         </div>
 
         <div class="bottom-user">
-            <div class="user-name">Kitchen Manager</div>
-            <div class="user-role">Administrator</div>
+
+            <div class="user-info">
+
+                <div class="user-name">
+                    Kitchen Manager
+                </div>
+
+                <div class="user-role">
+                    Administrator
+                </div>
+
+            </div>
+
+            <a href="/" class="logout-btn">
+                <i class="fa-solid fa-right-from-bracket"></i>
+            </a>
+
         </div>
 
     </aside>
