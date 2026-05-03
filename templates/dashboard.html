@@ -34,16 +34,8 @@
     </div>
 
     <div class="stat-card">
-        <div class="stat-label">Labor Cost</div>
-        <div class="stat-value">${{ labor_cost }}</div>
-        <div class="stat-change negative">
-            +4.2% labor increase
-        </div>
-    </div>
-
-    <div class="stat-card">
-        <div class="stat-label">Kitchen Waste</div>
-        <div class="stat-value">${{ waste_cost }}</div>
+        <div class="stat-label">Waste % of Sales</div>
+        <div class="stat-value">{{ waste_percent }}%</div>
         <div class="stat-change negative">
             +18% waste increase
         </div>
@@ -54,6 +46,14 @@
         <div class="stat-value">{{ labor_percent }}%</div>
         <div class="stat-change">
             Within target range
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Profit Impact %</div>
+        <div class="stat-value">{{ profit_impact_percent }}%</div>
+        <div class="stat-change negative">
+            Margin pressure detected
         </div>
     </div>
 
@@ -94,12 +94,12 @@
         </div>
 
         <div class="ai-summary">
-            Kitchen waste increased during the dinner shift,
-            primarily driven by burger remakes and incorrect
-            orders. Labor costs remained within acceptable
-            thresholds, though staffing between 2 PM and
-            4 PM appears slightly elevated compared to
-            historical sales trends.
+            Waste percentages increased during the dinner rush,
+            particularly between 6 PM and 8 PM where remake
+            frequency exceeded normal operating trends.
+            Labor remained within target thresholds overall,
+            though early afternoon staffing efficiency appears
+            lower than projected sales demand.
         </div>
 
     </div>
@@ -163,6 +163,56 @@
                     </span>
                 </td>
             </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Hourly Analytics
+        </div>
+
+        <select class="dropdown">
+            <option>Today</option>
+            <option>Yesterday</option>
+            <option>This Week</option>
+        </select>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Hour</th>
+                <th>Hourly Sales</th>
+                <th>Covers</th>
+                <th>Labor Cost</th>
+                <th>Sales / Server Hr</th>
+                <th>Covers / Server Hr</th>
+                <th>Labor %</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for row in hourly_data %}
+
+            <tr>
+                <td>{{ row.hour }}</td>
+                <td>${{ row.sales }}</td>
+                <td>{{ row.covers }}</td>
+                <td>${{ row.labor_cost }}</td>
+                <td>${{ row.sales_per_server_hour }}</td>
+                <td>{{ row.covers_per_server_hour }}</td>
+                <td>{{ row.labor_percent }}%</td>
+            </tr>
+
+            {% endfor %}
 
         </tbody>
 
