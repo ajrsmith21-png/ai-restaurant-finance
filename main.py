@@ -1,3 +1,5 @@
+import os
+
 from flask import (
     Flask,
     render_template,
@@ -25,7 +27,26 @@ app = Flask(__name__)
 
 app.config["SECRET_KEY"] = "change_this_later"
 
-app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+# =========================
+# DATABASE CONFIG
+# =========================
+
+database_url = os.getenv("DATABASE_URL")
+
+# Render sometimes provides postgres://
+# SQLAlchemy prefers postgresql://
+
+if database_url and database_url.startswith("postgres://"):
+
+    database_url = database_url.replace(
+        "postgres://",
+        "postgresql://",
+        1
+    )
+
+app.config["SQLALCHEMY_DATABASE_URI"] = database_url
+
+app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
@@ -46,6 +67,7 @@ def load_user(user_id):
 def home():
 
     return redirect(url_for("login"))
+
 
 @app.route("/register", methods=["GET", "POST"])
 def register():
@@ -83,6 +105,7 @@ def register():
 
     return render_template("register.html")
 
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -112,6 +135,7 @@ def login():
         return redirect(url_for("dashboard"))
 
     return render_template("login.html")
+
 
 @app.route("/logout")
 @login_required
@@ -247,6 +271,7 @@ def reports():
         "reports.html",
         active_page="reports"
     )
+
 
 with app.app_context():
     db.create_all()
