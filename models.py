@@ -1,32 +1,28 @@
 from flask_sqlalchemy import SQLAlchemy
-        nullable=False
-    )
+from flask_login import UserMixin
+from datetime import datetime
 
-    email = db.Column(
-        db.String(150),
-        unique=True,
-        nullable=False
-    )
+db = SQLAlchemy()
 
-    phone = db.Column(
-        db.String(50),
-        nullable=False
-    )
+# =========================
+# USER MODEL
+# =========================
 
-    password = db.Column(
-        db.String(255),
-        nullable=False
-    )
+class User(UserMixin, db.Model):
 
-    is_admin = db.Column(
-        db.Boolean,
-        default=False
-    )
+    id = db.Column(db.Integer, primary_key=True)
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
+    first_name = db.Column(db.String(150), nullable=False)
+    last_name = db.Column(db.String(150), nullable=False)
+
+    email = db.Column(db.String(150), unique=True, nullable=False)
+    phone = db.Column(db.String(50), nullable=False)
+
+    password = db.Column(db.String(255), nullable=False)
+
+    is_admin = db.Column(db.Boolean, default=False)
+
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)
 
 
 # =========================
@@ -37,31 +33,14 @@ class AccessKey(db.Model):
 
     __tablename__ = "access_keys"
 
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
+    id = db.Column(db.Integer, primary_key=True)
 
-    access_key = db.Column(
-        db.String(255),
-        unique=True,
-        nullable=False
-    )
+    access_key = db.Column(db.String(255), unique=True, nullable=False)
 
-    assigned_email = db.Column(
-        db.String(255)
-    )
+    assigned_email = db.Column(db.String(255))
 
-    is_used = db.Column(
-        db.Boolean,
-        default=False
-    )
+    is_used = db.Column(db.Boolean, default=False)
 
-    used_by_email = db.Column(
-        db.String(255)
-    )
+    used_by_email = db.Column(db.String(255))
 
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
+    created_at = db.Column(db.DateTime, default=datetime.utcnow)

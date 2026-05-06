@@ -113,6 +113,7 @@ def register():
         )
 
         db.session.add(new_user)
+        db.session.flush()  # ensures user exists in session safely
 
         access_key.is_used = True
         access_key.used_by_email = email
