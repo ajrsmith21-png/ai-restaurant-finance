@@ -1,14 +1,129 @@
-from flask import Flask, render_template
+from flask import (
+    Flask,
+    render_template,
+    request,
+    redirect,
+    url_for
+)
+
+from flask_login import (
+    LoginManager,
+    login_user,
+    logout_user,
+    login_required,
+    current_user
+)
+
+from werkzeug.security import (
+    generate_password_hash,
+    check_password_hash
+)
+
+from models import db, User
 
 app = Flask(__name__)
+
+app.config["SECRET_KEY"] = "change_this_later"
+
+app.config["SQLALCHEMY_DATABASE_URI"] = "sqlite:///database.db"
+
+db.init_app(app)
+
+login_manager = LoginManager()
+
+login_manager.login_view = "login"
+
+login_manager.init_app(app)
+
+
+@login_manager.user_loader
+def load_user(user_id):
+
+    return User.query.get(int(user_id))
 
 
 @app.route("/")
 def home():
+
+    return redirect(url_for("login"))
+
+@app.route("/register", methods=["GET", "POST"])
+def register():
+
+    if request.method == "POST":
+
+        email = request.form.get("email")
+
+        password = request.form.get("password")
+
+        existing_user = User.query.filter_by(
+            email=email
+        ).first()
+
+        if existing_user:
+
+            return "Email already exists"
+
+        hashed_password = generate_password_hash(
+            password
+        )
+
+        new_user = User(
+            email=email,
+            password=hashed_password
+        )
+
+        db.session.add(new_user)
+
+        db.session.commit()
+
+        login_user(new_user)
+
+        return redirect(url_for("dashboard"))
+
+    return render_template("register.html")
+
+@app.route("/login", methods=["GET", "POST"])
+def login():
+
+    if request.method == "POST":
+
+        email = request.form.get("email")
+
+        password = request.form.get("password")
+
+        user = User.query.filter_by(
+            email=email
+        ).first()
+
+        if not user:
+
+            return "User not found"
+
+        if not check_password_hash(
+            user.password,
+            password
+        ):
+
+            return "Incorrect password"
+
+        login_user(user)
+
+        return redirect(url_for("dashboard"))
+
     return render_template("login.html")
+
+@app.route("/logout")
+@login_required
+def logout():
+
+    logout_user()
+
+    return redirect(url_for("login"))
 
 
 @app.route("/dashboard")
+@login_required
 def dashboard():
 
     # CORE METRICS
@@ -105,6 +220,7 @@ def dashboard():
 
 
 @app.route("/waste-analytics")
+@login_required
 def waste_analytics():
 
     return render_template(
@@ -114,6 +230,7 @@ def waste_analytics():
 
 
 @app.route("/labour-tracking")
+@login_required
 def labour_tracking():
 
     return render_template(
@@ -123,12 +240,16 @@ def labour_tracking():
 
 
 @app.route("/reports")
+@login_required
 def reports():
 
     return render_template(
         "reports.html",
         active_page="reports"
     )
+
+with app.app_context():
+    db.create_all()
 
 
 if __name__ == "__main__":
