@@ -1,76 +1,4 @@
 from flask_sqlalchemy import SQLAlchemy
-from flask_login import UserMixin
-from datetime import datetime
-
-db = SQLAlchemy()
-
-
-# =========================
-# BUSINESS MODEL
-# =========================
-
-class Business(db.Model):
-
-    __tablename__ = "businesses"
-
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    business_name = db.Column(
-        db.String(255),
-        nullable=False
-    )
-
-    business_email = db.Column(
-        db.String(255)
-    )
-
-    business_phone = db.Column(
-        db.String(50)
-    )
-
-    business_address = db.Column(
-        db.String(500)
-    )
-
-    pos_provider = db.Column(
-        db.String(100)
-    )
-
-    created_at = db.Column(
-        db.DateTime,
-        default=datetime.utcnow
-    )
-
-    users = db.relationship(
-        "User",
-        backref="business",
-        lazy=True
-    )
-
-
-# =========================
-# USER MODEL
-# =========================
-
-class User(UserMixin, db.Model):
-
-    __tablename__ = "users"
-
-    id = db.Column(
-        db.Integer,
-        primary_key=True
-    )
-
-    first_name = db.Column(
-        db.String(100),
-        nullable=False
-    )
-
-    last_name = db.Column(
-        db.String(100),
         nullable=False
     )
 
@@ -90,9 +18,14 @@ class User(UserMixin, db.Model):
         nullable=False
     )
 
-    business_id = db.Column(
-        db.Integer,
-        db.ForeignKey("businesses.id")
+    is_admin = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
     )
 
 
@@ -115,15 +48,17 @@ class AccessKey(db.Model):
         nullable=False
     )
 
-    business_id = db.Column(
-        db.Integer,
-        db.ForeignKey("businesses.id"),
-        nullable=False
+    assigned_email = db.Column(
+        db.String(255)
     )
 
     is_used = db.Column(
         db.Boolean,
         default=False
+    )
+
+    used_by_email = db.Column(
+        db.String(255)
     )
 
     created_at = db.Column(

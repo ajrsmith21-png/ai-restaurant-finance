@@ -1,0 +1,419 @@
+<!DOCTYPE html>
+
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>RushOps Admin</title>
+
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+
+<style>
+
+:root{
+    --bg:#070b14;
+    --surface:#111827;
+    --surface-2:#1f2937;
+    --border:rgba(255,255,255,0.08);
+    --text:#f9fafb;
+    --muted:#9ca3af;
+    --blue:#3b82f6;
+    --green:#22c55e;
+    --red:#ef4444;
+}
+
+*{
+    box-sizing:border-box;
+}
+
+body{
+    margin:0;
+    background:var(--bg);
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+}
+
+.wrapper{
+    display:flex;
+    min-height:100vh;
+}
+
+/* =========================
+   SIDEBAR
+========================= */
+
+.sidebar{
+    width:260px;
+    background:#0b1220;
+    border-right:1px solid var(--border);
+    padding:30px 20px;
+}
+
+.logo{
+    font-size:28px;
+    font-weight:800;
+    margin-bottom:40px;
+}
+
+.logo span{
+    color:var(--blue);
+}
+
+.nav{
+    display:flex;
+    flex-direction:column;
+    gap:10px;
+}
+
+.nav a{
+    text-decoration:none;
+    color:var(--muted);
+    padding:14px 16px;
+    border-radius:12px;
+    transition:0.2s;
+    font-weight:600;
+}
+
+.nav a:hover,
+.nav a.active{
+    background:rgba(59,130,246,0.12);
+    color:white;
+}
+
+/* =========================
+   MAIN CONTENT
+========================= */
+
+.main{
+    flex:1;
+    padding:30px;
+}
+
+.topbar{
+    display:flex;
+    justify-content:space-between;
+    align-items:center;
+    margin-bottom:30px;
+}
+
+.topbar h1{
+    margin:0;
+    font-size:34px;
+}
+
+.generate-btn{
+    background:var(--blue);
+    border:none;
+    color:white;
+    padding:14px 20px;
+    border-radius:12px;
+    font-weight:700;
+    cursor:pointer;
+    transition:0.2s;
+}
+
+.generate-btn:hover{
+    opacity:0.9;
+}
+
+/* =========================
+   STATS
+========================= */
+
+.stats-grid{
+    display:grid;
+    grid-template-columns:repeat(auto-fit,minmax(240px,1fr));
+    gap:20px;
+    margin-bottom:30px;
+}
+
+.stat-card{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+}
+
+.stat-label{
+    color:var(--muted);
+    font-size:14px;
+    margin-bottom:12px;
+}
+
+.stat-value{
+    font-size:34px;
+    font-weight:800;
+}
+
+/* =========================
+   TABLES
+========================= */
+
+.section{
+    background:var(--surface);
+    border:1px solid var(--border);
+    border-radius:20px;
+    padding:24px;
+    margin-bottom:24px;
+}
+
+.section h2{
+    margin-top:0;
+    margin-bottom:20px;
+}
+
+.table-wrapper{
+    overflow-x:auto;
+}
+
+table{
+    width:100%;
+    border-collapse:collapse;
+}
+
+th{
+    text-align:left;
+    color:var(--muted);
+    font-size:13px;
+    padding-bottom:14px;
+    border-bottom:1px solid var(--border);
+}
+
+td{
+    padding:16px 0;
+    border-bottom:1px solid rgba(255,255,255,0.04);
+}
+
+.badge{
+    display:inline-flex;
+    align-items:center;
+    justify-content:center;
+    padding:6px 12px;
+    border-radius:999px;
+    font-size:12px;
+    font-weight:700;
+}
+
+.badge.green{
+    background:rgba(34,197,94,0.15);
+    color:var(--green);
+}
+
+.badge.red{
+    background:rgba(239,68,68,0.15);
+    color:var(--red);
+}
+
+/* =========================
+   RESPONSIVE
+========================= */
+
+@media(max-width:900px){
+
+    .wrapper{
+        flex-direction:column;
+    }
+
+    .sidebar{
+        width:100%;
+        border-right:none;
+        border-bottom:1px solid var(--border);
+    }
+
+}
+
+</style>
+
+</head>
+<body>
+
+<div class="wrapper">
+
+```
+<!-- SIDEBAR -->
+
+<aside class="sidebar">
+
+    <div class="logo">
+        Rush<span>Ops</span>
+    </div>
+
+    <nav class="nav">
+        <a href="/admin" class="active">
+            Admin Dashboard
+        </a>
+
+        <a href="#">
+            Access Keys
+        </a>
+
+        <a href="#">
+            Businesses
+        </a>
+
+        <a href="#">
+            Users
+        </a>
+
+        <a href="/dashboard">
+            Main Dashboard
+        </a>
+    </nav>
+
+</aside>
+
+
+<!-- MAIN -->
+
+<main class="main">
+
+    <div class="topbar">
+
+        <h1>
+            Admin Dashboard
+        </h1>
+
+        <button class="generate-btn">
+            Generate Access Key
+        </button>
+
+    </div>
+
+
+    <!-- STATS -->
+
+    <div class="stats-grid">
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Total Restaurants
+            </div>
+
+            <div class="stat-value">
+                12
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Active Users
+            </div>
+
+            <div class="stat-value">
+                34
+            </div>
+        </div>
+
+        <div class="stat-card">
+            <div class="stat-label">
+                Active Access Keys
+            </div>
+
+            <div class="stat-value">
+                7
+            </div>
+        </div>
+
+    </div>
+
+
+    <!-- ACCESS KEYS -->
+
+    <section class="section">
+
+        <h2>
+            Access Keys
+        </h2>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Access Key</th>
+                        <th>Assigned Email</th>
+                        <th>Status</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>RSH-92KD-PLX1</td>
+                        <td>owner@restaurant.com</td>
+                        <td>
+                            <span class="badge green">
+                                Active
+                            </span>
+                        </td>
+                    </tr>
+
+                    <tr>
+                        <td>RSH-XK82-LM22</td>
+                        <td>hello@bella.com</td>
+                        <td>
+                            <span class="badge red">
+                                Used
+                            </span>
+                        </td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+
+    <!-- USERS -->
+
+    <section class="section">
+
+        <h2>
+            Registered Users
+        </h2>
+
+        <div class="table-wrapper">
+
+            <table>
+
+                <thead>
+                    <tr>
+                        <th>Name</th>
+                        <th>Email</th>
+                        <th>Phone</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+
+                    <tr>
+                        <td>John Smith</td>
+                        <td>owner@restaurant.com</td>
+                        <td>(555) 555-5555</td>
+                    </tr>
+
+                    <tr>
+                        <td>Sarah Jones</td>
+                        <td>hello@bella.com</td>
+                        <td>(555) 222-1111</td>
+                    </tr>
+
+                </tbody>
+
+            </table>
+
+        </div>
+
+    </section>
+
+</main>
+```
+
+</div>
+
+</body>
+</html>

@@ -21,7 +21,7 @@ from werkzeug.security import (
     check_password_hash
 )
 
-from models import db, User
+from models import db, User, AccessKey
 
 app = Flask(__name__)
 
@@ -70,7 +70,6 @@ def home():
 
 
 @app.route("/register", methods=["GET", "POST"])
-def register():
 
     if request.method == "POST":
 
@@ -84,6 +83,22 @@ def register():
 
         password = request.form.get("password")
 
+        confirm_password = request.form.get(
+            "confirm_password"
+        )
+
+        access_key_value = request.form.get(
+            "access_key"
+        )
+
+        # =========================
+        # VALIDATIONS
+        # =========================
+
+        if password != confirm_password:
+
+            return "Passwords do not match"
+
         existing_user = User.query.filter_by(
             email=email
         ).first()
@@ -91,6 +106,23 @@ def register():
         if existing_user:
 
             return "Email already exists"
+
+        access_key = AccessKey.query.filter_by(
+            access_key=access_key_value,
+            is_used=False
+        ).first()
+
+        if not access_key:
+
+            return "Invalid or already used access key"
+
+        # OPTIONAL EMAIL MATCH CHECK
+
+        if access_key.assigned_email:
+
+            if access_key.assigned_email.lower() != email.lower():
+
+                return "This access key is assigned to a different email"
 
         hashed_password = generate_password_hash(
             password
@@ -106,6 +138,10 @@ def register():
 
         db.session.add(new_user)
 
+        access_key.is_used = True
+
+        access_key.used_by_email = email
+
         db.session.commit()
 
         login_user(new_user)
@@ -113,7 +149,6 @@ def register():
         return redirect(url_for("dashboard"))
 
     return render_template("register.html")
-
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
@@ -248,6 +283,18 @@ def dashboard():
         hourly_data=hourly_data,
 
         active_page="dashboard"
+    )
+
+@app.route("/admin")
+@login_required
+def admin():
+
+    if not current_user.is_admin:
+
+        return redirect(url_for("dashboard"))
+
+    return render_template(
+        "admin.html"
     )
 
 
