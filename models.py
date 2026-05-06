@@ -1,11 +1,12 @@
 from flask_sqlalchemy import SQLAlchemy
 from flask_login import UserMixin
+from datetime import datetime
 
 db = SQLAlchemy()
 
 
 # =========================
-# BUSINESSES
+# BUSINESS MODEL
 # =========================
 
 class Business(db.Model):
@@ -18,11 +19,8 @@ class Business(db.Model):
     )
 
     business_name = db.Column(
-        db.String(255)
-    )
-
-    business_address = db.Column(
-        db.String(255)
+        db.String(255),
+        nullable=False
     )
 
     business_email = db.Column(
@@ -30,21 +28,31 @@ class Business(db.Model):
     )
 
     business_phone = db.Column(
-        db.String(30)
+        db.String(50)
+    )
+
+    business_address = db.Column(
+        db.String(500)
     )
 
     pos_provider = db.Column(
         db.String(100)
     )
 
-    pos_connected = db.Column(
-        db.Boolean,
-        default=False
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+    users = db.relationship(
+        "User",
+        backref="business",
+        lazy=True
     )
 
 
 # =========================
-# USERS
+# USER MODEL
 # =========================
 
 class User(UserMixin, db.Model):
@@ -73,11 +81,12 @@ class User(UserMixin, db.Model):
     )
 
     phone = db.Column(
-        db.String(30)
+        db.String(50),
+        nullable=False
     )
 
     password = db.Column(
-        db.String(200),
+        db.String(255),
         nullable=False
     )
 
@@ -88,7 +97,7 @@ class User(UserMixin, db.Model):
 
 
 # =========================
-# ACCESS KEYS
+# ACCESS KEY MODEL
 # =========================
 
 class AccessKey(db.Model):
@@ -106,11 +115,18 @@ class AccessKey(db.Model):
         nullable=False
     )
 
+    business_id = db.Column(
+        db.Integer,
+        db.ForeignKey("businesses.id"),
+        nullable=False
+    )
+
     is_used = db.Column(
         db.Boolean,
         default=False
     )
 
-    used_by_user_id = db.Column(
-        db.Integer
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
     )
