@@ -70,41 +70,24 @@ def home():
 
 
 @app.route("/register", methods=["GET", "POST"])
+def register():
 
     if request.method == "POST":
 
         first_name = request.form.get("first_name")
-
         last_name = request.form.get("last_name")
-
         phone = request.form.get("phone")
-
         email = request.form.get("email")
-
         password = request.form.get("password")
-
-        confirm_password = request.form.get(
-            "confirm_password"
-        )
-
-        access_key_value = request.form.get(
-            "access_key"
-        )
-
-        # =========================
-        # VALIDATIONS
-        # =========================
+        confirm_password = request.form.get("confirm_password")
+        access_key_value = request.form.get("access_key")
 
         if password != confirm_password:
-
             return "Passwords do not match"
 
-        existing_user = User.query.filter_by(
-            email=email
-        ).first()
+        existing_user = User.query.filter_by(email=email).first()
 
         if existing_user:
-
             return "Email already exists"
 
         access_key = AccessKey.query.filter_by(
@@ -113,20 +96,13 @@ def home():
         ).first()
 
         if not access_key:
-
             return "Invalid or already used access key"
 
-        # OPTIONAL EMAIL MATCH CHECK
-
         if access_key.assigned_email:
-
             if access_key.assigned_email.lower() != email.lower():
-
                 return "This access key is assigned to a different email"
 
-        hashed_password = generate_password_hash(
-            password
-        )
+        hashed_password = generate_password_hash(password)
 
         new_user = User(
             first_name=first_name,
@@ -139,7 +115,6 @@ def home():
         db.session.add(new_user)
 
         access_key.is_used = True
-
         access_key.used_by_email = email
 
         db.session.commit()
@@ -149,6 +124,7 @@ def home():
         return redirect(url_for("dashboard"))
 
     return render_template("register.html")
+
 @app.route("/login", methods=["GET", "POST"])
 def login():
 
