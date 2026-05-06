@@ -74,6 +74,12 @@ def register():
 
     if request.method == "POST":
 
+        first_name = request.form.get("first_name")
+
+        last_name = request.form.get("last_name")
+
+        phone = request.form.get("phone")
+
         email = request.form.get("email")
 
         password = request.form.get("password")
@@ -91,6 +97,9 @@ def register():
         )
 
         new_user = User(
+            first_name=first_name,
+            last_name=last_name,
+            phone=phone,
             email=email,
             password=hashed_password
         )
@@ -104,7 +113,6 @@ def register():
         return redirect(url_for("dashboard"))
 
     return render_template("register.html")
-
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
