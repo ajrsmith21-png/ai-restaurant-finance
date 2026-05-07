@@ -81,63 +81,129 @@
             padding: 24px;
         }
 
+        .form-grid{
+            display:grid;
+            grid-template-columns:repeat(2,1fr);
+            gap:14px;
+            margin-top:20px;
+        }
+
+        .form-grid input{
+            background:#1f2937;
+            border:1px solid rgba(255,255,255,0.06);
+            padding:12px;
+            border-radius:12px;
+            color:white;
+            outline:none;
+        }
+
     </style>
 </head>
 
 <body>
 
-    <aside class="settings-sidebar">
+<aside class="settings-sidebar">
 
-        <div class="settings-title">
-            Settings
-        </div>
+    <div class="settings-title">
+        Settings
+    </div>
 
-        <a href="/settings?tab=user-info"
-           class="settings-item {% if active_settings_tab == 'user-info' %}active{% endif %}">
-            User Info
-        </a>
+    <a href="/settings?tab=user-info"
+       class="settings-item {% if active_settings_tab == 'user-info' %}active{% endif %}">
+        User Info
+    </a>
 
-        <a href="/settings?tab=security"
-           class="settings-item {% if active_settings_tab == 'security' %}active{% endif %}">
-            Security
-        </a>
+    <a href="/settings?tab=security"
+       class="settings-item {% if active_settings_tab == 'security' %}active{% endif %}">
+        Security
+    </a>
 
-        <a href="/settings?tab=billing"
-           class="settings-item {% if active_settings_tab == 'billing' %}active{% endif %}">
-            Billing
-        </a>
+    <a href="/settings?tab=billing"
+       class="settings-item {% if active_settings_tab == 'billing' %}active{% endif %}">
+        Billing
+    </a>
 
-        <a href="/settings?tab=restaurants"
-           class="settings-item {% if active_settings_tab == 'restaurants' %}active{% endif %}">
-            My Restaurants
-        </a>
+    <a href="/settings?tab=restaurants"
+       class="settings-item {% if active_settings_tab == 'restaurants' %}active{% endif %}">
+        My Restaurants
+    </a>
 
-        <a href="/dashboard" class="back-btn">
-            ← Back to Dashboard
-        </a>
+    <a href="/dashboard" class="back-btn">
+        ← Back to Dashboard
+    </a>
 
-    </aside>
+</aside>
 
-    <main class="settings-content">
+<main class="settings-content">
 
-        <div class="panel">
+    <div class="panel">
 
-            {% if active_settings_tab == "user-info" %}
-                <h2>User Info</h2>
+        {% if active_settings_tab == "user-info" %}
 
-            {% elif active_settings_tab == "security" %}
-                <h2>Security</h2>
+            <h2>User Info</h2>
 
-            {% elif active_settings_tab == "billing" %}
-                <h2>Billing</h2>
+        {% elif active_settings_tab == "security" %}
 
-            {% elif active_settings_tab == "restaurants" %}
-                <h2>My Restaurants</h2>
-            {% endif %}
+            <h2>Security</h2>
 
-        </div>
+        {% elif active_settings_tab == "billing" %}
 
-    </main>
+            <h2>Billing</h2>
+
+        {% elif active_settings_tab == "restaurants" %}
+
+            <h2>My Restaurant</h2>
+
+            <form method="POST" action="/settings/restaurant/save">
+
+                <div class="form-grid">
+
+                    <input name="restaurant_name" placeholder="Restaurant Name"
+                           value="{{ restaurant.restaurant_name if restaurant else '' }}">
+
+                    <input name="business_type" placeholder="Business Type"
+                           value="{{ restaurant.business_type if restaurant else '' }}">
+
+                    <input name="phone" placeholder="Phone"
+                           value="{{ restaurant.phone if restaurant else '' }}">
+
+                    <input name="email" placeholder="Email"
+                           value="{{ restaurant.email if restaurant else '' }}">
+
+                    <input name="address" placeholder="Address"
+                           value="{{ restaurant.address if restaurant else '' }}">
+
+                    <input name="city" placeholder="City"
+                           value="{{ restaurant.city if restaurant else '' }}">
+
+                    <input name="province" placeholder="Province"
+                           value="{{ restaurant.province if restaurant else '' }}">
+
+                    <input name="country" placeholder="Country"
+                           value="{{ restaurant.country if restaurant else '' }}">
+
+                    <input name="postal_code" placeholder="Postal Code"
+                           value="{{ restaurant.postal_code if restaurant else '' }}">
+
+                    <input name="timezone" placeholder="Timezone"
+                           value="{{ restaurant.timezone if restaurant else '' }}">
+
+                    <input name="pos_provider" placeholder="POS Provider"
+                           value="{{ restaurant.pos_provider if restaurant else '' }}">
+
+                </div>
+
+                <button type="submit" class="action-btn" style="margin-top:20px;">
+                    Save Restaurant
+                </button>
+
+            </form>
+
+        {% endif %}
+
+    </div>
+
+</main>
 
 </body>
 </html>

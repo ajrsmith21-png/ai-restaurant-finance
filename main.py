@@ -33,11 +33,7 @@ app.config["SECRET_KEY"] = "change_this_later"
 
 database_url = os.getenv("DATABASE_URL")
 
-# Render sometimes provides postgres://
-# SQLAlchemy prefers postgresql://
-
 if database_url and database_url.startswith("postgres://"):
-
     database_url = database_url.replace(
         "postgres://",
         "postgresql://",
@@ -45,27 +41,26 @@ if database_url and database_url.startswith("postgres://"):
     )
 
 app.config["SQLALCHEMY_DATABASE_URI"] = database_url
-
 app.config["SQLALCHEMY_TRACK_MODIFICATIONS"] = False
 
 db.init_app(app)
 
 login_manager = LoginManager()
-
 login_manager.login_view = "login"
-
 login_manager.init_app(app)
 
 
 @login_manager.user_loader
 def load_user(user_id):
-
     return User.query.get(int(user_id))
 
 
+# =========================
+# ROUTES
+# =========================
+
 @app.route("/")
 def home():
-
     return redirect(url_for("login"))
 
 
@@ -86,7 +81,6 @@ def register():
             return "Passwords do not match"
 
         existing_user = User.query.filter_by(email=email).first()
-
         if existing_user:
             return "Email already exists"
 
@@ -113,7 +107,7 @@ def register():
         )
 
         db.session.add(new_user)
-        db.session.flush()  # ensures user exists in session safely
+        db.session.flush()
 
         access_key.is_used = True
         access_key.used_by_email = email
@@ -121,10 +115,10 @@ def register():
         db.session.commit()
 
         login_user(new_user)
-
         return redirect(url_for("dashboard"))
 
     return render_template("register.html")
+
 
 @app.route("/login", methods=["GET", "POST"])
 def login():
@@ -132,26 +126,17 @@ def login():
     if request.method == "POST":
 
         email = request.form.get("email")
-
         password = request.form.get("password")
 
-        user = User.query.filter_by(
-            email=email
-        ).first()
+        user = User.query.filter_by(email=email).first()
 
         if not user:
-
             return "User not found"
 
-        if not check_password_hash(
-            user.password,
-            password
-        ):
-
+        if not check_password_hash(user.password, password):
             return "Incorrect password"
 
         login_user(user)
-
         return redirect(url_for("dashboard"))
 
     return render_template("login.html")
@@ -160,9 +145,7 @@ def login():
 @app.route("/logout")
 @login_required
 def logout():
-
     logout_user()
-
     return redirect(url_for("login"))
 
 
@@ -176,29 +159,20 @@ def dashboard():
 
     needs_restaurant_setup = restaurant is None
 
-    # CORE METRICS
-
     sales = 5200
     labor_cost = 1450
     waste_cost = 340
     covers = 186
 
-    # PERCENTAGES
-
     labor_percent = round((labor_cost / sales) * 100, 1)
     waste_percent = round((waste_cost / sales) * 100, 1)
-
-    # PROFIT IMPACT
 
     profit_impact_percent = round(
         ((labor_cost + waste_cost) / sales) * 100,
         1
     )
 
-    # HOURLY ANALYTICS
-
     hourly_data = [
-
         {
             "hour": "11 AM",
             "sales": 420,
@@ -208,7 +182,6 @@ def dashboard():
             "covers_per_server_hour": 6,
             "labor_percent": 26
         },
-
         {
             "hour": "12 PM",
             "sales": 780,
@@ -218,84 +191,96 @@ def dashboard():
             "covers_per_server_hour": 8.5,
             "labor_percent": 20
         }
-
     ]
 
     return render_template(
         "dashboard.html",
-
         sales=sales,
         labor_cost=labor_cost,
         waste_cost=waste_cost,
         covers=covers,
-
         labor_percent=labor_percent,
         waste_percent=waste_percent,
         profit_impact_percent=profit_impact_percent,
-
         hourly_data=hourly_data,
-
         needs_restaurant_setup=needs_restaurant_setup,
-
         active_page="dashboard"
     )
+
 
 @app.route("/settings")
 @login_required
 def settings():
 
-    active_settings_tab = request.args.get(
-        "tab",
-        "user-info"
-    )
+    active_settings_tab = request.args.get("tab", "user-info")
+
+    restaurant = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).first()
 
     return render_template(
         "settings.html",
         active_page="settings",
-        active_settings_tab=active_settings_tab
+        active_settings_tab=active_settings_tab,
+        restaurant=restaurant
     )
+
+
+@app.route("/settings/restaurant/save", methods=["POST"])
+@login_required
+def save_restaurant():
+
+    restaurant = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not restaurant:
+        restaurant = Restaurant(owner_id=current_user.id)
+        db.session.add(restaurant)
+
+    restaurant.restaurant_name = request.form.get("restaurant_name")
+    restaurant.business_type = request.form.get("business_type")
+    restaurant.phone = request.form.get("phone")
+    restaurant.email = request.form.get("email")
+    restaurant.address = request.form.get("address")
+    restaurant.city = request.form.get("city")
+    restaurant.province = request.form.get("province")
+    restaurant.country = request.form.get("country")
+    restaurant.postal_code = request.form.get("postal_code")
+    restaurant.timezone = request.form.get("timezone")
+    restaurant.pos_provider = request.form.get("pos_provider")
+
+    db.session.commit()
+
+    return redirect(url_for("settings", tab="restaurants"))
+
 
 @app.route("/admin")
 @login_required
 def admin():
 
     if not current_user.is_admin:
-
         return redirect(url_for("dashboard"))
 
-    return render_template(
-        "admin.html"
-    )
+    return render_template("admin.html")
 
 
 @app.route("/waste-analytics")
 @login_required
 def waste_analytics():
-
-    return render_template(
-        "waste_analytics.html",
-        active_page="waste"
-    )
+    return render_template("waste_analytics.html", active_page="waste")
 
 
 @app.route("/labour-tracking")
 @login_required
 def labour_tracking():
-
-    return render_template(
-        "labour_tracking.html",
-        active_page="labour"
-    )
+    return render_template("labour_tracking.html", active_page="labour")
 
 
 @app.route("/reports")
 @login_required
 def reports():
-
-    return render_template(
-        "reports.html",
-        active_page="reports"
-    )
+    return render_template("reports.html", active_page="reports")
 
 
 with app.app_context():
