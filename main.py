@@ -21,7 +21,7 @@ from werkzeug.security import (
     check_password_hash
 )
 
-from models import db, User, AccessKey
+from models import db, User, AccessKey, Restaurant
 
 app = Flask(__name__)
 
@@ -169,6 +169,12 @@ def logout():
 @app.route("/dashboard")
 @login_required
 def dashboard():
+
+restaurant = Restaurant.query.filter_by(
+    owner_id=current_user.id
+).first()
+
+needs_restaurant_setup = restaurant is None
 
     # CORE METRICS
 
