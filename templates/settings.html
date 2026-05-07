@@ -1,0 +1,223 @@
+{% extends "base.html" %}
+
+{% block content %}
+
+<div class="topbar">
+
+    <div class="welcome">
+        <h1>Restaurant Operations Dashboard</h1>
+        <p>
+            Monitor labor costs, kitchen waste, and profitability in real time.
+        </p>
+    </div>
+
+    <div class="top-actions">
+        <button class="action-btn">
+            Export Report
+        </button>
+
+        <button class="action-btn">
+            Add Waste Log
+        </button>
+    </div>
+
+</div>
+
+<div class="stats-grid">
+
+    <div class="stat-card">
+        <div class="stat-label">Today's Sales</div>
+        <div class="stat-value">${{ sales }}</div>
+        <div class="stat-change">
+            +12.4% from yesterday
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Waste % of Sales</div>
+        <div class="stat-value">{{ waste_percent }}%</div>
+        <div class="stat-change negative">
+            +18% waste increase
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Labor %</div>
+        <div class="stat-value">{{ labor_percent }}%</div>
+        <div class="stat-change">
+            Within target range
+        </div>
+    </div>
+
+    <div class="stat-card">
+        <div class="stat-label">Profit Impact %</div>
+        <div class="stat-value">{{ profit_impact_percent }}%</div>
+        <div class="stat-change negative">
+            Margin pressure detected
+        </div>
+    </div>
+
+</div>
+
+<div class="content-grid">
+
+    <div class="panel">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                Operational Analytics
+            </div>
+
+            <select class="dropdown">
+                <option>Last 7 Days</option>
+                <option>Last 30 Days</option>
+                <option>Last 90 Days</option>
+            </select>
+        </div>
+
+        <div class="chart-placeholder">
+            Charts & Analytics Coming Soon
+        </div>
+
+    </div>
+
+    <div class="panel ai-card">
+
+        <div class="panel-header">
+            <div class="panel-title">
+                AI Daily Summary
+            </div>
+        </div>
+
+        <div class="ai-tag">
+            AI Insight Engine Active
+        </div>
+
+        <div class="ai-summary">
+            Waste percentages increased during the dinner rush,
+            particularly between 6 PM and 8 PM where remake
+            frequency exceeded normal operating trends.
+            Labor remained within target thresholds overall,
+            though early afternoon staffing efficiency appears
+            lower than projected sales demand.
+        </div>
+
+    </div>
+
+</div>
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Highest Waste Menu Items
+        </div>
+
+        <button class="action-btn">
+            View Full Report
+        </button>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Menu Item</th>
+                <th>Waste Cost</th>
+                <th>Remakes</th>
+                <th>Status</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            <tr>
+                <td>Classic Burger</td>
+                <td>$124</td>
+                <td>14</td>
+                <td>
+                    <span class="status high">
+                        High Waste
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Chicken Alfredo</td>
+                <td>$86</td>
+                <td>9</td>
+                <td>
+                    <span class="status medium">
+                        Moderate
+                    </span>
+                </td>
+            </tr>
+
+            <tr>
+                <td>Caesar Salad</td>
+                <td>$28</td>
+                <td>3</td>
+                <td>
+                    <span class="status low">
+                        Stable
+                    </span>
+                </td>
+            </tr>
+
+        </tbody>
+
+    </table>
+
+</div>
+
+<div class="panel table-panel">
+
+    <div class="panel-header">
+        <div class="panel-title">
+            Hourly Analytics
+        </div>
+
+        <select class="dropdown">
+            <option>Today</option>
+            <option>Yesterday</option>
+            <option>This Week</option>
+        </select>
+    </div>
+
+    <table>
+
+        <thead>
+            <tr>
+                <th>Hour</th>
+                <th>Hourly Sales</th>
+                <th>Covers</th>
+                <th>Labor Cost</th>
+                <th>Sales / Server Hr</th>
+                <th>Covers / Server Hr</th>
+                <th>Labor %</th>
+            </tr>
+        </thead>
+
+        <tbody>
+
+            {% for row in hourly_data %}
+
+            <tr>
+                <td>{{ row.hour }}</td>
+                <td>${{ row.sales }}</td>
+                <td>{{ row.covers }}</td>
+                <td>${{ row.labor_cost }}</td>
+                <td>${{ row.sales_per_server_hour }}</td>
+                <td>{{ row.covers_per_server_hour }}</td>
+                <td>{{ row.labor_percent }}%</td>
+            </tr>
+
+            {% endfor %}
+
+        </tbody>
+
+    </table>
+
+</div>
+
+{% endblock %}

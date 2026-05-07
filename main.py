@@ -239,6 +239,22 @@ def dashboard():
 
         active_page="dashboard"
     )
+
+@app.route("/settings")
+@login_required
+def settings():
+
+    active_settings_tab = request.args.get(
+        "tab",
+        "user-info"
+    )
+
+    return render_template(
+        "settings.html",
+        active_page="settings",
+        active_settings_tab=active_settings_tab
+    )
+
 @app.route("/admin")
 @login_required
 def admin():

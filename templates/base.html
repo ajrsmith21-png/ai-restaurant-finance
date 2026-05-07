@@ -386,53 +386,60 @@
 
     <aside class="sidebar">
 
-        <div class="logo">
-            Kitchen<span>IQ</span>
-        </div>
+        <div>
 
-        <div class="nav-section">
-
-            <div class="nav-title">Overview</div>
-
-            <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
-                <i class="fa-solid fa-chart-line"></i>
-                Dashboard
-            </a>
-
-            <a href="/waste-analytics" class="nav-item {% if active_page == 'waste' %}active{% endif %}">
-                <i class="fa-solid fa-trash"></i>
-                Waste Analytics
-            </a>
-
-            <a href="/labour-tracking" class="nav-item {% if active_page == 'labour' %}active{% endif %}">
-                <i class="fa-solid fa-users"></i>
-                Labor Tracking
-            </a>
-
-            <a href="/reports" class="nav-item {% if active_page == 'reports' %}active{% endif %}">
-                <i class="fa-solid fa-chart-pie"></i>
-                Reports
-            </a>
-
-        </div>
-
-        <div class="nav-section">
-
-            <div class="nav-title">Management</div>
-
-            <div class="nav-item">
-                <i class="fa-solid fa-store"></i>
-                Locations
+            <div class="logo">
+                Kitchen<span>IQ</span>
             </div>
 
-            <div class="nav-item">
-                <i class="fa-solid fa-bell"></i>
-                Alerts
+            <div class="nav-section">
+
+                <div class="nav-title">Overview</div>
+
+                <a href="/dashboard" class="nav-item {% if active_page == 'dashboard' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-line"></i>
+                    Dashboard
+                </a>
+
+                <a href="/waste-analytics" class="nav-item {% if active_page == 'waste' %}active{% endif %}">
+                    <i class="fa-solid fa-trash"></i>
+                    Waste Analytics
+                </a>
+
+                <a href="/labour-tracking" class="nav-item {% if active_page == 'labour' %}active{% endif %}">
+                    <i class="fa-solid fa-users"></i>
+                    Labor Tracking
+                </a>
+
+                <a href="/reports" class="nav-item {% if active_page == 'reports' %}active{% endif %}">
+                    <i class="fa-solid fa-chart-pie"></i>
+                    Reports
+                </a>
+
             </div>
 
-            <div class="nav-item">
-                <i class="fa-solid fa-gear"></i>
-                Settings
+            <div class="nav-section">
+
+                <div class="nav-title">Management</div>
+
+                <a href="#"
+                   class="nav-item">
+                    <i class="fa-solid fa-store"></i>
+                    Locations
+                </a>
+
+                <a href="#"
+                   class="nav-item">
+                    <i class="fa-solid fa-bell"></i>
+                    Alerts
+                </a>
+
+                <a href="/settings"
+                   class="nav-item {% if active_page == 'settings' %}active{% endif %}">
+                    <i class="fa-solid fa-gear"></i>
+                    Settings
+                </a>
+
             </div>
 
         </div>
@@ -442,16 +449,20 @@
             <div class="user-info">
 
                 <div class="user-name">
-                    Kitchen Manager
+                    {{ current_user.first_name }} {{ current_user.last_name }}
                 </div>
 
                 <div class="user-role">
-                    Administrator
+                    {% if current_user.is_admin %}
+                        Administrator
+                    {% else %}
+                        Restaurant Manager
+                    {% endif %}
                 </div>
 
             </div>
 
-            <a href="/" class="logout-btn">
+            <a href="/logout" class="logout-btn">
                 <i class="fa-solid fa-right-from-bracket"></i>
             </a>
 
@@ -466,6 +477,5 @@
     </main>
 
 </div>
-
 </body>
 </html>
