@@ -44,3 +44,75 @@ class AccessKey(db.Model):
     used_by_email = db.Column(db.String(255))
 
     created_at = db.Column(db.DateTime, default=datetime.utcnow)
+
+# =========================
+# RESTAURANT MODEL
+# =========================
+
+class Restaurant(db.Model):
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    owner_id = db.Column(
+        db.Integer,
+        db.ForeignKey("user.id"),
+        nullable=False
+    )
+
+    restaurant_name = db.Column(
+        db.String(255),
+        nullable=False
+    )
+
+    business_type = db.Column(
+        db.String(100)
+    )
+
+    phone = db.Column(
+        db.String(50)
+    )
+
+    email = db.Column(
+        db.String(255)
+    )
+
+    address = db.Column(
+        db.String(255)
+    )
+
+    city = db.Column(
+        db.String(100)
+    )
+
+    province = db.Column(
+        db.String(100)
+    )
+
+    country = db.Column(
+        db.String(100)
+    )
+
+    postal_code = db.Column(
+        db.String(30)
+    )
+
+    timezone = db.Column(
+        db.String(100)
+    )
+
+    pos_provider = db.Column(
+        db.String(100)
+    )
+
+    api_connected = db.Column(
+        db.Boolean,
+        default=False
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
