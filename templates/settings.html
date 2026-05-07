@@ -1,223 +1,143 @@
-{% extends "base.html" %}
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>Settings - KitchenIQ</title>
 
-{% block content %}
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.5.1/css/all.min.css">
 
-<div class="topbar">
+    <style>
 
-    <div class="welcome">
-        <h1>Restaurant Operations Dashboard</h1>
-        <p>
-            Monitor labor costs, kitchen waste, and profitability in real time.
-        </p>
-    </div>
+        body {
+            margin: 0;
+            font-family: Inter, Arial, sans-serif;
+            background: #0b0f17;
+            color: white;
+            display: flex;
+            height: 100vh;
+        }
 
-    <div class="top-actions">
-        <button class="action-btn">
-            Export Report
-        </button>
+        /* SETTINGS SIDEBAR */
 
-        <button class="action-btn">
-            Add Waste Log
-        </button>
-    </div>
+        .settings-sidebar {
+            width: 260px;
+            background: #111827;
+            border-right: 1px solid rgba(255,255,255,0.06);
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+        }
 
-</div>
+        .settings-title {
+            font-size: 20px;
+            font-weight: 700;
+            margin-bottom: 30px;
+        }
 
-<div class="stats-grid">
+        .settings-item {
+            padding: 12px 14px;
+            border-radius: 12px;
+            color: #cbd5e1;
+            text-decoration: none;
+            margin-bottom: 10px;
+            transition: 0.2s;
+        }
 
-    <div class="stat-card">
-        <div class="stat-label">Today's Sales</div>
-        <div class="stat-value">${{ sales }}</div>
-        <div class="stat-change">
-            +12.4% from yesterday
-        </div>
-    </div>
+        .settings-item:hover {
+            background: #1f2937;
+            color: white;
+        }
 
-    <div class="stat-card">
-        <div class="stat-label">Waste % of Sales</div>
-        <div class="stat-value">{{ waste_percent }}%</div>
-        <div class="stat-change negative">
-            +18% waste increase
-        </div>
-    </div>
+        .settings-item.active {
+            background: #6366f1;
+            color: white;
+        }
 
-    <div class="stat-card">
-        <div class="stat-label">Labor %</div>
-        <div class="stat-value">{{ labor_percent }}%</div>
-        <div class="stat-change">
-            Within target range
-        </div>
-    </div>
+        .back-btn {
+            margin-top: auto;
+            padding: 12px 14px;
+            border-radius: 12px;
+            background: #1f2937;
+            text-decoration: none;
+            color: white;
+            text-align: center;
+        }
 
-    <div class="stat-card">
-        <div class="stat-label">Profit Impact %</div>
-        <div class="stat-value">{{ profit_impact_percent }}%</div>
-        <div class="stat-change negative">
-            Margin pressure detected
-        </div>
-    </div>
+        .back-btn:hover {
+            background: #2b3548;
+        }
 
-</div>
+        /* CONTENT */
 
-<div class="content-grid">
+        .settings-content {
+            flex: 1;
+            padding: 40px;
+        }
 
-    <div class="panel">
+        .panel {
+            background: #111827;
+            border: 1px solid rgba(255,255,255,0.06);
+            border-radius: 18px;
+            padding: 24px;
+        }
 
-        <div class="panel-header">
-            <div class="panel-title">
-                Operational Analytics
-            </div>
+    </style>
+</head>
 
-            <select class="dropdown">
-                <option>Last 7 Days</option>
-                <option>Last 30 Days</option>
-                <option>Last 90 Days</option>
-            </select>
-        </div>
+<body>
 
-        <div class="chart-placeholder">
-            Charts & Analytics Coming Soon
-        </div>
+    <aside class="settings-sidebar">
 
-    </div>
-
-    <div class="panel ai-card">
-
-        <div class="panel-header">
-            <div class="panel-title">
-                AI Daily Summary
-            </div>
-        </div>
-
-        <div class="ai-tag">
-            AI Insight Engine Active
-        </div>
-
-        <div class="ai-summary">
-            Waste percentages increased during the dinner rush,
-            particularly between 6 PM and 8 PM where remake
-            frequency exceeded normal operating trends.
-            Labor remained within target thresholds overall,
-            though early afternoon staffing efficiency appears
-            lower than projected sales demand.
+        <div class="settings-title">
+            Settings
         </div>
 
-    </div>
+        <a href="/settings?tab=user-info"
+           class="settings-item {% if active_settings_tab == 'user-info' %}active{% endif %}">
+            User Info
+        </a>
 
-</div>
+        <a href="/settings?tab=security"
+           class="settings-item {% if active_settings_tab == 'security' %}active{% endif %}">
+            Security
+        </a>
 
-<div class="panel table-panel">
+        <a href="/settings?tab=billing"
+           class="settings-item {% if active_settings_tab == 'billing' %}active{% endif %}">
+            Billing
+        </a>
 
-    <div class="panel-header">
-        <div class="panel-title">
-            Highest Waste Menu Items
+        <a href="/settings?tab=restaurants"
+           class="settings-item {% if active_settings_tab == 'restaurants' %}active{% endif %}">
+            My Restaurants
+        </a>
+
+        <a href="/dashboard" class="back-btn">
+            ← Back to Dashboard
+        </a>
+
+    </aside>
+
+    <main class="settings-content">
+
+        <div class="panel">
+
+            {% if active_settings_tab == "user-info" %}
+                <h2>User Info</h2>
+
+            {% elif active_settings_tab == "security" %}
+                <h2>Security</h2>
+
+            {% elif active_settings_tab == "billing" %}
+                <h2>Billing</h2>
+
+            {% elif active_settings_tab == "restaurants" %}
+                <h2>My Restaurants</h2>
+            {% endif %}
+
         </div>
 
-        <button class="action-btn">
-            View Full Report
-        </button>
-    </div>
+    </main>
 
-    <table>
-
-        <thead>
-            <tr>
-                <th>Menu Item</th>
-                <th>Waste Cost</th>
-                <th>Remakes</th>
-                <th>Status</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            <tr>
-                <td>Classic Burger</td>
-                <td>$124</td>
-                <td>14</td>
-                <td>
-                    <span class="status high">
-                        High Waste
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Chicken Alfredo</td>
-                <td>$86</td>
-                <td>9</td>
-                <td>
-                    <span class="status medium">
-                        Moderate
-                    </span>
-                </td>
-            </tr>
-
-            <tr>
-                <td>Caesar Salad</td>
-                <td>$28</td>
-                <td>3</td>
-                <td>
-                    <span class="status low">
-                        Stable
-                    </span>
-                </td>
-            </tr>
-
-        </tbody>
-
-    </table>
-
-</div>
-
-<div class="panel table-panel">
-
-    <div class="panel-header">
-        <div class="panel-title">
-            Hourly Analytics
-        </div>
-
-        <select class="dropdown">
-            <option>Today</option>
-            <option>Yesterday</option>
-            <option>This Week</option>
-        </select>
-    </div>
-
-    <table>
-
-        <thead>
-            <tr>
-                <th>Hour</th>
-                <th>Hourly Sales</th>
-                <th>Covers</th>
-                <th>Labor Cost</th>
-                <th>Sales / Server Hr</th>
-                <th>Covers / Server Hr</th>
-                <th>Labor %</th>
-            </tr>
-        </thead>
-
-        <tbody>
-
-            {% for row in hourly_data %}
-
-            <tr>
-                <td>{{ row.hour }}</td>
-                <td>${{ row.sales }}</td>
-                <td>{{ row.covers }}</td>
-                <td>${{ row.labor_cost }}</td>
-                <td>${{ row.sales_per_server_hour }}</td>
-                <td>{{ row.covers_per_server_hour }}</td>
-                <td>{{ row.labor_percent }}%</td>
-            </tr>
-
-            {% endfor %}
-
-        </tbody>
-
-    </table>
-
-</div>
-
-{% endblock %}
+</body>
+</html>
