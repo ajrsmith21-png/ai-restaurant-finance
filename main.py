@@ -170,11 +170,11 @@ def logout():
 @login_required
 def dashboard():
 
-restaurant = Restaurant.query.filter_by(
-    owner_id=current_user.id
-).first()
+    restaurant = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).first()
 
-needs_restaurant_setup = restaurant is None
+    needs_restaurant_setup = restaurant is None
 
     # CORE METRICS
 
@@ -217,36 +217,6 @@ needs_restaurant_setup = restaurant is None
             "sales_per_server_hour": 195,
             "covers_per_server_hour": 8.5,
             "labor_percent": 20
-        },
-
-        {
-            "hour": "1 PM",
-            "sales": 690,
-            "covers": 29,
-            "labor_cost": 155,
-            "sales_per_server_hour": 172,
-            "covers_per_server_hour": 7.2,
-            "labor_percent": 22
-        },
-
-        {
-            "hour": "2 PM",
-            "sales": 480,
-            "covers": 21,
-            "labor_cost": 145,
-            "sales_per_server_hour": 120,
-            "covers_per_server_hour": 5.2,
-            "labor_percent": 30
-        },
-
-        {
-            "hour": "3 PM",
-            "sales": 350,
-            "covers": 14,
-            "labor_cost": 138,
-            "sales_per_server_hour": 88,
-            "covers_per_server_hour": 3.5,
-            "labor_percent": 39
         }
 
     ]
@@ -265,9 +235,10 @@ needs_restaurant_setup = restaurant is None
 
         hourly_data=hourly_data,
 
+        needs_restaurant_setup=needs_restaurant_setup,
+
         active_page="dashboard"
     )
-
 @app.route("/admin")
 @login_required
 def admin():
