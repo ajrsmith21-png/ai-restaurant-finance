@@ -2,6 +2,150 @@
 
 {% block content %}
 
+<style>
+
+/* =========================
+   ONBOARDING MODAL
+========================= */
+
+.onboarding-overlay{
+    position:fixed;
+    inset:0;
+
+    background:rgba(3,7,18,.82);
+
+    backdrop-filter:blur(10px);
+
+    z-index:999999;
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    padding:24px;
+}
+
+.onboarding-modal{
+    width:100%;
+    max-width:560px;
+
+    background:linear-gradient(
+        180deg,
+        rgba(18,24,38,.98),
+        rgba(9,13,22,.98)
+    );
+
+    border:1px solid rgba(255,255,255,.08);
+
+    border-radius:28px;
+
+    padding:52px;
+
+    text-align:center;
+
+    box-shadow:
+        0 30px 80px rgba(0,0,0,.45);
+}
+
+.onboarding-icon{
+    width:92px;
+    height:92px;
+
+    margin:0 auto 28px;
+
+    border-radius:26px;
+
+    background:rgba(99,102,241,.15);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    font-size:42px;
+}
+
+.onboarding-modal h1{
+    color:white;
+
+    font-size:36px;
+    font-weight:800;
+
+    margin-bottom:18px;
+}
+
+.onboarding-modal p{
+    color:rgba(255,255,255,.72);
+
+    font-size:16px;
+    line-height:1.8;
+
+    margin-bottom:36px;
+}
+
+.setup-btn{
+    width:100%;
+
+    border:none;
+
+    border-radius:18px;
+
+    padding:18px 24px;
+
+    background:linear-gradient(
+        135deg,
+        #6366f1,
+        #8b5cf6
+    );
+
+    color:white;
+
+    font-size:16px;
+    font-weight:700;
+
+    cursor:pointer;
+
+    transition:.2s ease;
+}
+
+.setup-btn:hover{
+    transform:translateY(-2px);
+
+    box-shadow:
+        0 14px 30px rgba(99,102,241,.35);
+}
+
+</style>
+
+{% if needs_restaurant_setup %}
+<div class="onboarding-overlay">
+
+    <div class="onboarding-modal">
+
+        <div class="onboarding-icon">
+            🍽️
+        </div>
+
+        <h1>Welcome to Rovelo</h1>
+
+        <p>
+            Before you can begin using your restaurant analytics
+            dashboard, let's set up your restaurant profile and
+            business information.
+        </p>
+
+        <button
+            class="setup-btn"
+            onclick="window.location.href='{{ url_for('settings') }}?tab=restaurants'">
+
+            Set Up My Restaurant
+
+        </button>
+
+    </div>
+
+</div>
+{% endif %}
+
 <div class="topbar">
 
     <div class="welcome">
