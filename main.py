@@ -153,11 +153,11 @@ def logout():
 @login_required
 def dashboard():
 
-    restaurant = Restaurant.query.filter_by(
-        owner_id=current_user.id
-    ).first()
+    locations = Restaurant.query.filter_by(
+       owner_id=current_user.id
+    ).all()
 
-    needs_restaurant_setup = restaurant is None
+    needs_restaurant_setup = len(locations) == 0
 
     sales = 5200
     labor_cost = 1450
@@ -230,13 +230,9 @@ def settings():
 @login_required
 def save_restaurant():
 
-    restaurant = Restaurant.query.filter_by(
+    restaurant = Restaurant(
         owner_id=current_user.id
-    ).first()
-
-    if not restaurant:
-        restaurant = Restaurant(owner_id=current_user.id)
-        db.session.add(restaurant)
+    )
 
     restaurant.restaurant_name = request.form.get("restaurant_name")
     restaurant.business_type = request.form.get("business_type")
@@ -250,10 +246,11 @@ def save_restaurant():
     restaurant.timezone = request.form.get("timezone")
     restaurant.pos_provider = request.form.get("pos_provider")
 
+    db.session.add(restaurant)
+
     db.session.commit()
 
-    return redirect(url_for("settings", tab="restaurants"))
-
+    return redirect(url_for("locations"))
 
 @app.route("/admin")
 @login_required
@@ -269,6 +266,20 @@ def admin():
 @login_required
 def waste_analytics():
     return render_template("waste_analytics.html", active_page="waste")
+
+@app.route("/locations")
+@login_required
+def locations():
+
+    locations = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    return render_template(
+        "locations.html",
+        active_page="locations",
+        locations=locations
+    )
 
 
 @app.route("/labour-tracking")
