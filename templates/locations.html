@@ -56,7 +56,10 @@
     font-size:14px;
     font-weight:800;
 
-    transition:.2s ease;
+    transition:
+        transform .18s ease,
+        box-shadow .22s ease,
+        opacity .18s ease;
 
     box-shadow:
         0 20px 40px rgba(99,102,241,.28);
@@ -64,6 +67,8 @@
 
 .add-location-btn:hover{
     transform:translateY(-2px);
+    box-shadow:
+        0 24px 50px rgba(99,102,241,.34);
 }
 
 .location-grid{
@@ -89,7 +94,10 @@
 
     overflow:hidden;
 
-    transition:.22s ease;
+    transition:
+        transform .22s ease,
+        border-color .22s ease,
+        box-shadow .22s ease;
 
     box-shadow:
         0 24px 60px rgba(0,0,0,.28);
@@ -221,7 +229,14 @@
 
     font-weight:700;
 
-    transition:.2s ease;
+    transition:
+        transform .18s ease,
+        opacity .18s ease,
+        background .18s ease;
+}
+
+.location-btn:hover{
+    transform:translateY(-2px);
 }
 
 .location-btn.primary{
@@ -242,8 +257,17 @@
     color:white;
 }
 
-.location-btn:hover{
-    transform:translateY(-2px);
+.location-btn.danger{
+    background:rgba(239,68,68,.12);
+
+    border:1px solid rgba(239,68,68,.22);
+
+    color:#fca5a5;
+}
+
+.location-btn.loading{
+    pointer-events:none;
+    opacity:.7;
 }
 
 .empty-state{
@@ -313,9 +337,12 @@
 
     background:rgba(0,0,0,.72);
 
-    backdrop-filter:blur(10px);
+    backdrop-filter:blur(12px);
 
-    display:none;
+    opacity:0;
+    visibility:hidden;
+
+    display:flex;
 
     align-items:center;
     justify-content:center;
@@ -323,10 +350,15 @@
     z-index:9999;
 
     padding:30px;
+
+    transition:
+        opacity .22s ease,
+        visibility .22s ease;
 }
 
 .location-modal.active{
-    display:flex;
+    opacity:1;
+    visibility:visible;
 }
 
 .modal-content{
@@ -352,6 +384,16 @@
 
     box-shadow:
         0 30px 80px rgba(0,0,0,.5);
+
+    transform:translateY(20px) scale(.98);
+
+    transition:
+        transform .24s ease,
+        opacity .24s ease;
+}
+
+.location-modal.active .modal-content{
+    transform:translateY(0) scale(1);
 }
 
 .modal-header{
@@ -389,6 +431,12 @@
     color:white;
 
     font-size:18px;
+
+    transition:.18s ease;
+}
+
+.close-modal:hover{
+    background:rgba(255,255,255,.09);
 }
 
 .form-section{
@@ -459,7 +507,7 @@
 
     color:white;
 
-    transition:.2s ease;
+    transition:.18s ease;
 }
 
 .input-group input:focus{
@@ -471,10 +519,16 @@
 
 .modal-actions{
     display:flex;
-    justify-content:flex-end;
+    justify-content:space-between;
+    align-items:center;
     gap:14px;
 
     margin-top:36px;
+}
+
+.modal-actions-right{
+    display:flex;
+    gap:14px;
 }
 
 .modal-btn{
@@ -489,7 +543,11 @@
 
     font-weight:800;
 
-    transition:.2s ease;
+    transition:.18s ease;
+}
+
+.modal-btn:hover{
+    transform:translateY(-2px);
 }
 
 .modal-btn.secondary{
@@ -510,6 +568,69 @@
     color:white;
 }
 
+.modal-btn.danger{
+    background:rgba(239,68,68,.12);
+
+    border:1px solid rgba(239,68,68,.22);
+
+    color:#fca5a5;
+}
+
+.loading-overlay{
+    position:fixed;
+    inset:0;
+
+    background:rgba(7,10,18,.82);
+
+    backdrop-filter:blur(12px);
+
+    display:flex;
+    align-items:center;
+    justify-content:center;
+
+    flex-direction:column;
+    gap:22px;
+
+    opacity:0;
+    visibility:hidden;
+
+    z-index:10000;
+
+    transition:.22s ease;
+}
+
+.loading-overlay.active{
+    opacity:1;
+    visibility:visible;
+}
+
+.loader{
+    width:72px;
+    height:72px;
+
+    border-radius:50%;
+
+    border:5px solid rgba(255,255,255,.08);
+    border-top-color:#8b5cf6;
+
+    animation:spin .9s linear infinite;
+}
+
+.loading-text{
+    font-size:20px;
+    font-weight:700;
+}
+
+.loading-subtext{
+    color:rgba(255,255,255,.6);
+}
+
+@keyframes spin{
+    to{
+        transform:rotate(360deg);
+    }
+}
+
 @media (max-width:900px){
 
     .locations-header{
@@ -523,6 +644,16 @@
 
     .input-group.full{
         grid-column:span 1;
+    }
+
+    .modal-actions{
+        flex-direction:column;
+        align-items:stretch;
+    }
+
+    .modal-actions-right{
+        width:100%;
+        flex-direction:column;
     }
 
 }
@@ -540,12 +671,14 @@
             <p>
                 Manage all restaurant locations connected to your organization.
                 Select a location to load its operational data, analytics,
-                staffing, and reporting throughout RushOps.
+                staffing, and reporting throughout KitchenIQ.
             </p>
 
         </div>
 
-        <button class="add-location-btn" onclick="openLocationModal()">
+        <button
+            class="add-location-btn"
+            onclick="openAddLocationModal()">
 
             <i class="fa-solid fa-plus"></i>
             Add Location
@@ -640,12 +773,33 @@
 
             <div class="location-actions">
 
-                <button class="location-btn primary">
+                <button
+                    class="location-btn primary"
+                    onclick="selectLocation(this, '{{ location.restaurant_name }}')">
+
                     Select Location
+
                 </button>
 
-                <button class="location-btn secondary">
+                <button
+                    class="location-btn secondary"
+                    onclick='openManageModal({
+                        id: "{{ location.id }}",
+                        restaurant_name: "{{ location.restaurant_name }}",
+                        business_type: "{{ location.business_type }}",
+                        phone: "{{ location.phone }}",
+                        email: "{{ location.email }}",
+                        address: "{{ location.address }}",
+                        city: "{{ location.city }}",
+                        province: "{{ location.province }}",
+                        country: "{{ location.country }}",
+                        postal_code: "{{ location.postal_code }}",
+                        timezone: "{{ location.timezone }}",
+                        pos_provider: "{{ location.pos_provider }}"
+                    })'>
+
                     Manage
+
                 </button>
 
             </div>
@@ -669,13 +823,15 @@
         </h2>
 
         <p>
-            RushOps uses location-based operational tracking.
+            KitchenIQ uses location-based operational tracking.
             Create your first restaurant location to begin managing
             analytics, staffing, labor performance, waste tracking,
             and business intelligence across your organization.
         </p>
 
-        <button class="add-location-btn" onclick="openLocationModal()">
+        <button
+            class="add-location-btn"
+            onclick="openAddLocationModal()">
 
             <i class="fa-solid fa-plus"></i>
             Create First Location
@@ -685,6 +841,22 @@
     </div>
 
     {% endif %}
+
+</div>
+
+<!-- LOADING OVERLAY -->
+
+<div class="loading-overlay" id="loadingOverlay">
+
+    <div class="loader"></div>
+
+    <div class="loading-text" id="loadingTitle">
+        Loading Location
+    </div>
+
+    <div class="loading-subtext">
+        Preparing analytics, staffing, reports, and operational data...
+    </div>
 
 </div>
 
@@ -698,7 +870,7 @@
 
             <div>
 
-                <div class="modal-title">
+                <div class="modal-title" id="modalTitle">
                     Add New Location
                 </div>
 
@@ -709,13 +881,22 @@
 
             </div>
 
-            <button class="close-modal" onclick="closeLocationModal()">
+            <button
+                class="close-modal"
+                onclick="closeLocationModal()">
+
                 <i class="fa-solid fa-xmark"></i>
+
             </button>
 
         </div>
 
         <form method="POST" action="/settings/restaurant/save">
+
+            <input
+                type="hidden"
+                name="location_id"
+                id="location_id">
 
             <div class="form-section">
 
@@ -729,35 +910,47 @@
                 <div class="form-grid">
 
                     <div class="input-group">
+
                         <label>Restaurant Name</label>
 
                         <input
+                            id="restaurant_name"
                             name="restaurant_name"
                             placeholder="Enter restaurant name">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Business Type</label>
 
                         <input
+                            id="business_type"
                             name="business_type"
                             placeholder="Casual Dining, Cafe, Bar...">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Phone Number</label>
 
                         <input
+                            id="phone"
                             name="phone"
                             placeholder="Business phone number">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Business Email</label>
 
                         <input
+                            id="email"
                             name="email"
                             placeholder="Business email address">
+
                     </div>
 
                 </div>
@@ -776,43 +969,58 @@
                 <div class="form-grid">
 
                     <div class="input-group full">
+
                         <label>Street Address</label>
 
                         <input
+                            id="address"
                             name="address"
                             placeholder="Restaurant address">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>City</label>
 
                         <input
+                            id="city"
                             name="city"
                             placeholder="City">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Province / State</label>
 
                         <input
+                            id="province"
                             name="province"
                             placeholder="Province or state">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Country</label>
 
                         <input
+                            id="country"
                             name="country"
                             placeholder="Country">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>Postal Code</label>
 
                         <input
+                            id="postal_code"
                             name="postal_code"
                             placeholder="Postal or ZIP code">
+
                     </div>
 
                 </div>
@@ -831,19 +1039,25 @@
                 <div class="form-grid">
 
                     <div class="input-group">
+
                         <label>Timezone</label>
 
                         <input
+                            id="timezone"
                             name="timezone"
                             placeholder="Timezone">
+
                     </div>
 
                     <div class="input-group">
+
                         <label>POS Provider</label>
 
                         <input
+                            id="pos_provider"
                             name="pos_provider"
                             placeholder="Square, Toast, Clover...">
+
                     </div>
 
                 </div>
@@ -854,19 +1068,37 @@
 
                 <button
                     type="button"
-                    class="modal-btn secondary"
-                    onclick="closeLocationModal()">
+                    class="modal-btn danger"
+                    id="deleteBtn"
+                    style="display:none;"
+                    onclick="deleteLocation()">
 
-                    Cancel
-
-                </button>
-
-                <button type="submit" class="modal-btn primary">
-
-                    <i class="fa-solid fa-floppy-disk"></i>
-                    Save Location
+                    <i class="fa-solid fa-trash"></i>
+                    Delete Location
 
                 </button>
+
+                <div class="modal-actions-right">
+
+                    <button
+                        type="button"
+                        class="modal-btn secondary"
+                        onclick="closeLocationModal()">
+
+                        Cancel
+
+                    </button>
+
+                    <button
+                        type="submit"
+                        class="modal-btn primary">
+
+                        <i class="fa-solid fa-floppy-disk"></i>
+                        Save Location
+
+                    </button>
+
+                </div>
 
             </div>
 
@@ -878,25 +1110,137 @@
 
 <script>
 
-function openLocationModal(){
-    document
-        .getElementById("locationModal")
-        .classList
-        .add("active");
+const modal = document.getElementById("locationModal");
+
+function openAddLocationModal(){
+
+    document.getElementById("modalTitle").innerText =
+        "Add New Location";
+
+    document.getElementById("deleteBtn").style.display =
+        "none";
+
+    clearForm();
+
+    modal.classList.add("active");
+}
+
+function openManageModal(location){
+
+    document.getElementById("modalTitle").innerText =
+        "Manage Location";
+
+    document.getElementById("deleteBtn").style.display =
+        "inline-flex";
+
+    document.getElementById("location_id").value =
+        location.id || "";
+
+    document.getElementById("restaurant_name").value =
+        location.restaurant_name || "";
+
+    document.getElementById("business_type").value =
+        location.business_type || "";
+
+    document.getElementById("phone").value =
+        location.phone || "";
+
+    document.getElementById("email").value =
+        location.email || "";
+
+    document.getElementById("address").value =
+        location.address || "";
+
+    document.getElementById("city").value =
+        location.city || "";
+
+    document.getElementById("province").value =
+        location.province || "";
+
+    document.getElementById("country").value =
+        location.country || "";
+
+    document.getElementById("postal_code").value =
+        location.postal_code || "";
+
+    document.getElementById("timezone").value =
+        location.timezone || "";
+
+    document.getElementById("pos_provider").value =
+        location.pos_provider || "";
+
+    modal.classList.add("active");
 }
 
 function closeLocationModal(){
-    document
-        .getElementById("locationModal")
-        .classList
-        .remove("active");
+    modal.classList.remove("active");
+}
+
+function clearForm(){
+
+    document.getElementById("location_id").value = "";
+
+    document.querySelectorAll(
+        "#locationModal input"
+    ).forEach(input => {
+
+        if(input.type !== "hidden"){
+            input.value = "";
+        }
+
+    });
+
+}
+
+function selectLocation(button, locationName){
+
+    button.classList.add("loading");
+
+    const overlay =
+        document.getElementById("loadingOverlay");
+
+    document.getElementById("loadingTitle").innerText =
+        "Loading " + locationName;
+
+    overlay.classList.add("active");
+
+    setTimeout(() => {
+
+        overlay.classList.remove("active");
+
+        button.classList.remove("loading");
+
+    }, 2200);
+
+}
+
+function deleteLocation(){
+
+    const confirmed = confirm(
+        "Are you sure you want to permanently delete this location?"
+    );
+
+    if(!confirmed){
+        return;
+    }
+
+    alert(
+        "Delete route not connected yet. UI is fully ready."
+    );
+
 }
 
 window.addEventListener("click", function(e){
 
-    const modal = document.getElementById("locationModal");
-
     if(e.target === modal){
+        closeLocationModal();
+    }
+
+});
+
+document.addEventListener("keydown", function(e){
+
+    if(e.key === "Escape"){
         closeLocationModal();
     }
 
