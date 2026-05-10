@@ -1,3 +1,4 @@
+import requests
 import os
 
 from flask import (
@@ -154,7 +155,7 @@ def logout():
 def dashboard():
 
     locations = Restaurant.query.filter_by(
-       owner_id=current_user.id
+        owner_id=current_user.id
     ).all()
 
     needs_restaurant_setup = len(locations) == 0
@@ -247,10 +248,10 @@ def save_restaurant():
     restaurant.pos_provider = request.form.get("pos_provider")
 
     db.session.add(restaurant)
-
     db.session.commit()
 
     return redirect(url_for("locations"))
+
 
 @app.route("/admin")
 @login_required
@@ -266,6 +267,7 @@ def admin():
 @login_required
 def waste_analytics():
     return render_template("waste_analytics.html", active_page="waste")
+
 
 @app.route("/locations")
 @login_required
@@ -294,8 +296,78 @@ def reports():
     return render_template("reports.html", active_page="reports")
 
 
-with app.app_context():
-    db.create_all()
+# =========================
+# CLOVER OAUTH
+# =========================
+
+@app.route("/auth/clover")
+@login_required
+def clover_login():
+
+    restaurant_id = request.args.get("restaurant_id")
+
+    client_id = os.getenv("CLOVER_CLIENT_ID")
+
+    redirect_uri = "https://your-render-url.onrender.com/auth/clover/callback"
+
+    url = (
+        "https://sandbox.dev.clover.com/oauth/authorize"
+        f"?client_id={client_id}"
+        f"&redirect_uri={redirect_uri}"
+        f"&state={restaurant_id}"
+        "&response_type=code"
+        "&scope=ORDERS_READ PAYMENTS_READ EMPLOYEES_READ"
+    )
+
+    return redirect(url)
+
+
+@app.route("/auth/clover/callback")
+@login_required
+def clover_callback():
+
+    code = request.args.get("code")
+    restaurant_id = request.args.get("state")
+
+    if not code or not restaurant_id:
+        return "Missing OAuth data", 400
+
+    client_id = os.getenv("CLOVER_CLIENT_ID")
+    client_secret = os.getenv("CLOVER_CLIENT_SECRET")
+
+    try:
+        response = requests.post(
+            "https://sandbox.dev.clover.com/oauth/token",
+            json={
+                "client_id": client_id,
+                "client_secret": client_secret,
+                "code": code
+            },
+            timeout=10
+        )
+
+        data = response.json()
+
+    except Exception:
+        return "Clover authentication failed (bad response)", 500
+
+    if "access_token" not in data:
+        return f"Clover auth failed: {data}", 400
+
+    restaurant = Restaurant.query.filter_by(
+        id=int(restaurant_id),
+        owner_id=current_user.id
+    ).first()
+
+    if not restaurant:
+        return "Restaurant not found", 404
+
+    restaurant.pos_provider = "clover"
+    restaurant.clover_access_token = data.get("access_token")
+
+    db.session.commit()
+
+    return redirect(url_for("locations"))
 
 
 if __name__ == "__main__":
