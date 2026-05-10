@@ -5,7 +5,7 @@
 <style>
 
 /* =========================
-   SAME STYLES (UNCHANGED)
+   SAME BASE STYLES (UNCHANGED)
 ========================= */
 
 .locations-page{
@@ -46,13 +46,11 @@
     gap:12px;
 
     padding:18px 24px;
-
     border-radius:20px;
 
     background:linear-gradient(135deg,#6366f1,#8b5cf6);
 
     color:white;
-
     font-size:14px;
     font-weight:800;
 
@@ -70,6 +68,10 @@
     gap:24px;
 }
 
+/* =========================
+   CARD (IMPROVED STRUCTURE)
+========================= */
+
 .location-card{
     position:relative;
     background:linear-gradient(180deg,rgba(17,24,39,.92),rgba(10,15,25,.96));
@@ -84,10 +86,12 @@
     transform:translateY(-4px);
 }
 
+/* HEADER */
 .location-top{
     display:flex;
     justify-content:space-between;
-    margin-bottom:26px;
+    align-items:flex-start;
+    margin-bottom:22px;
 }
 
 .location-name{
@@ -96,24 +100,38 @@
     color:white;
 }
 
-.location-type{
-    display:inline-flex;
-    gap:8px;
-    padding:10px 14px;
-    border-radius:999px;
-    background:rgba(99,102,241,.12);
-    color:#c7d2fe;
+/* POS STATUS (NEW SYSTEM) */
+.pos-status{
+    display:flex;
+    align-items:center;
+    gap:10px;
     font-size:12px;
-    font-weight:700;
+    font-weight:800;
+    padding:8px 12px;
+    border-radius:999px;
+    background:rgba(255,255,255,.04);
+    color:rgba(255,255,255,.75);
 }
 
-.location-status{
-    width:12px;
-    height:12px;
+.pos-dot{
+    width:10px;
+    height:10px;
     border-radius:50%;
-    background:#22c55e;
 }
 
+/* RED = NOT CONNECTED */
+.pos-dot.red{
+    background:#ef4444;
+    box-shadow:0 0 10px rgba(239,68,68,.5);
+}
+
+/* GREEN = CONNECTED */
+.pos-dot.green{
+    background:#22c55e;
+    box-shadow:0 0 12px rgba(34,197,94,.8);
+}
+
+/* DETAILS */
 .location-details{
     display:flex;
     flex-direction:column;
@@ -132,8 +150,7 @@
     color:#a5b4fc;
 }
 
-/* buttons */
-
+/* BUTTONS */
 .location-actions{
     display:flex;
     gap:14px;
@@ -160,21 +177,19 @@
     color:white;
 }
 
-/* POS badge */
+/* CONNECT POS INLINE BUTTON */
+.pos-connect-btn{
+    height:42px;
+    padding:0 16px;
+    border-radius:12px;
+    border:none;
+    cursor:pointer;
 
-.pos-connected{
-    color:#22c55e;
+    font-size:13px;
     font-weight:800;
-    display:flex;
-    align-items:center;
-    gap:8px;
-}
 
-.pos-dot{
-    width:10px;
-    height:10px;
-    border-radius:50%;
-    box-shadow:0 0 12px rgba(34,197,94,.8);
+    background:linear-gradient(135deg,#6366f1,#8b5cf6);
+    color:white;
 }
 
 </style>
@@ -184,13 +199,8 @@
     <div class="locations-header">
 
         <div class="locations-title">
-
             <h1>Locations</h1>
-
-            <p>
-                Manage all restaurant locations connected to your system.
-            </p>
-
+            <p>Manage all restaurant locations connected to your system.</p>
         </div>
 
         <button class="add-location-btn" onclick="openAddLocationModal()">
@@ -208,26 +218,24 @@
 
         <div class="location-card">
 
+            <!-- HEADER -->
             <div class="location-top">
 
-                <div>
-                    <div class="location-name">
-                        {{ location.restaurant_name }}
-                    </div>
-
-                    <!-- FIXED: status dot now reflects POS state -->
-                    <div class="location-type">
-
-                        {% if location.pos_provider == "clover" %}
-                            <div class="location-status" style="background:#22c55e;"></div>
-                        {% else %}
-                            <div class="location-status" style="background:#ef4444;"></div>
-                        {% endif %}
-
-                        {{ location.business_type }}
-
-                    </div>
+                <div class="location-name">
+                    {{ location.restaurant_name }}
                 </div>
+
+                {% if location.pos_provider == "clover" %}
+                    <div class="pos-status">
+                        <div class="pos-dot green"></div>
+                        POS Connected
+                    </div>
+                {% else %}
+                    <div class="pos-status">
+                        <div class="pos-dot red"></div>
+                        Not Connected
+                    </div>
+                {% endif %}
 
             </div>
 
@@ -258,36 +266,24 @@
                     <span>{{ location.timezone }}</span>
                 </div>
 
-                <!-- =========================
-                     FIXED POS SECTION
-                ========================== -->
-
+                <!-- POS ACTION -->
                 <div class="location-row">
-
                     <i class="fa-solid fa-cash-register"></i>
 
                     {% if location.pos_provider == "clover" %}
 
-                        <div class="pos-connected">
-                            <div class="pos-dot" style="background:#22c55e;"></div>
-                            Connected
+                        <div class="pos-status">
+                            <div class="pos-dot green"></div>
+                            POS Connected
                         </div>
 
                     {% else %}
 
-                        <div class="pos-connected">
-                            <div class="pos-dot" style="background:#ef4444;"></div>
-                            Not Connected
-                        </div>
-
                         <a href="/auth/clover?restaurant_id={{ location.id }}"
-                           style="text-decoration:none; margin-left:auto;">
+                           style="text-decoration:none;">
 
-                            <button class="location-btn primary"
-                                    style="height:42px;font-size:13px;">
-
+                            <button class="pos-connect-btn">
                                 Connect POS
-
                             </button>
 
                         </a>
@@ -303,9 +299,7 @@
 
                 <button class="location-btn primary"
                         onclick="selectLocation(this,'{{ location.restaurant_name }}')">
-
                     Select
-
                 </button>
 
                 <button class="location-btn secondary"
@@ -323,9 +317,7 @@
                             timezone:"{{ location.timezone }}",
                             pos_provider:"{{ location.pos_provider }}"
                         })'>
-
                     Manage
-
                 </button>
 
             </div>
