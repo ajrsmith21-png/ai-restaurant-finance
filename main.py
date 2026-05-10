@@ -323,6 +323,7 @@ def clover_login():
 
 
 @app.route("/auth/clover/callback")
+@login_required
 def clover_callback():
 
     code = request.args.get("code")
@@ -335,12 +336,12 @@ def clover_callback():
     client_secret = os.getenv("CLOVER_CLIENT_SECRET")
 
     if not client_id or not client_secret:
-        return "Missing Clover credentials in environment", 500
+        return "Missing Clover credentials", 500
 
     try:
         response = requests.post(
             "https://sandbox.dev.clover.com/oauth/token",
-            data={  # ✅ IMPORTANT FIX (NOT json)
+            data={
                 "client_id": client_id,
                 "client_secret": client_secret,
                 "code": code
@@ -370,3 +371,7 @@ def clover_callback():
     db.session.commit()
 
     return redirect(url_for("locations"))
+
+
+if __name__ == "__main__":
+    app.run(debug=True)
