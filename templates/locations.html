@@ -173,7 +173,6 @@
 .pos-dot{
     width:10px;
     height:10px;
-    background:#22c55e;
     border-radius:50%;
     box-shadow:0 0 12px rgba(34,197,94,.8);
 }
@@ -216,9 +215,17 @@
                         {{ location.restaurant_name }}
                     </div>
 
+                    <!-- FIXED: status dot now reflects POS state -->
                     <div class="location-type">
-                        <div class="location-status"></div>
+
+                        {% if location.pos_provider == "clover" %}
+                            <div class="location-status" style="background:#22c55e;"></div>
+                        {% else %}
+                            <div class="location-status" style="background:#ef4444;"></div>
+                        {% endif %}
+
                         {{ location.business_type }}
+
                     </div>
                 </div>
 
@@ -252,7 +259,7 @@
                 </div>
 
                 <!-- =========================
-                     POS CONNECT SECTION
+                     FIXED POS SECTION
                 ========================== -->
 
                 <div class="location-row">
@@ -262,14 +269,19 @@
                     {% if location.pos_provider == "clover" %}
 
                         <div class="pos-connected">
-                            <div class="pos-dot"></div>
-                            POS Connected
+                            <div class="pos-dot" style="background:#22c55e;"></div>
+                            Connected
                         </div>
 
                     {% else %}
 
+                        <div class="pos-connected">
+                            <div class="pos-dot" style="background:#ef4444;"></div>
+                            Not Connected
+                        </div>
+
                         <a href="/auth/clover?restaurant_id={{ location.id }}"
-                           style="text-decoration:none;">
+                           style="text-decoration:none; margin-left:auto;">
 
                             <button class="location-btn primary"
                                     style="height:42px;font-size:13px;">
