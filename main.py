@@ -23,6 +23,7 @@ from werkzeug.security import (
 )
 
 from models import db, User, AccessKey, Restaurant
+from urllib.parse import quote
 
 app = Flask(__name__)
 
@@ -305,7 +306,6 @@ def reports():
 def clover_login():
 
     restaurant_id = request.args.get("restaurant_id")
-
     client_id = os.getenv("CLOVER_CLIENT_ID")
 
     redirect_uri = "https://ai-restaurant-finance.onrender.com/auth/clover/callback"
@@ -335,10 +335,13 @@ def clover_callback():
     client_id = os.getenv("CLOVER_CLIENT_ID")
     client_secret = os.getenv("CLOVER_CLIENT_SECRET")
 
+    if not client_id or not client_secret:
+        return "Missing Clover credentials in environment", 500
+
     try:
         response = requests.post(
             "https://sandbox.dev.clover.com/oauth/token",
-            json={
+            data={  # ✅ IMPORTANT FIX (NOT json)
                 "client_id": client_id,
                 "client_secret": client_secret,
                 "code": code
@@ -348,8 +351,8 @@ def clover_callback():
 
         data = response.json()
 
-    except Exception:
-        return "Clover authentication failed (bad response)", 500
+    except Exception as e:
+        return f"Clover authentication failed: {str(e)}", 500
 
     if "access_token" not in data:
         return f"Clover auth failed: {data}", 400
@@ -368,7 +371,3 @@ def clover_callback():
     db.session.commit()
 
     return redirect(url_for("locations"))
-
-
-if __name__ == "__main__":
-    app.run(debug=True)
