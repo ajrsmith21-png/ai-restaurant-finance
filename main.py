@@ -308,7 +308,7 @@ def clover_login():
 
     client_id = os.getenv("CLOVER_CLIENT_ID")
 
-    redirect_uri = "https://your-render-url.onrender.com/auth/clover/callback"
+    redirect_uri = "https://ai-restaurant-finance.onrender.com/auth/clover/callback"
 
     url = (
         "https://sandbox.dev.clover.com/oauth/authorize"
