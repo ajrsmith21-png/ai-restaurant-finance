@@ -323,7 +323,6 @@ def clover_login():
 
 
 @app.route("/auth/clover/callback")
-@login_required
 def clover_callback():
 
     code = request.args.get("code")
