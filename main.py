@@ -323,8 +323,9 @@ def clover_login():
 
 
 @app.route("/auth/clover/callback")
-@login_required
 def clover_callback():
+
+    print("🔥 CLOVER CALLBACK HIT")
 
     code = request.args.get("code")
     restaurant_id = request.args.get("state")
