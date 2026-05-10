@@ -313,10 +313,10 @@ def clover_login():
     url = (
         "https://sandbox.dev.clover.com/oauth/authorize"
         f"?client_id={client_id}"
-        f"&redirect_uri={redirect_uri}"
+        f"&redirect_uri={quote(redirect_uri, safe='')}"
         f"&state={restaurant_id}"
         "&response_type=code"
-        "&scope=ORDERS_READ PAYMENTS_READ EMPLOYEES_READ"
+        "&scope=employees:read%20orders:read%20payments:read"
     )
 
     return redirect(url)
