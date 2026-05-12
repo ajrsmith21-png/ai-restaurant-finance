@@ -342,6 +342,15 @@ def seed_data():
     from models import DailySales
     from datetime import date, timedelta
 
+    restaurant = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not restaurant:
+        return "No restaurant found for this user"
+
+    restaurant_id = restaurant.id
+
     today = date.today()
 
     # create 14 days of fake data
@@ -350,14 +359,7 @@ def seed_data():
         day = today - timedelta(days=i)
 
         entry = DailySales(
-                restaurant = Restaurant.query.filter_by(
-        owner_id=current_user.id
-    ).first()
-
-    if not restaurant:
-        return "No restaurant found for this user"
-
-    restaurant_id = restaurant.id
+            restaurant_id=restaurant_id,
             date=day,
             sales=round(4000 + (i * 120), 2),
             labor_cost=round(1200 + (i * 40), 2),
@@ -370,7 +372,6 @@ def seed_data():
     db.session.commit()
 
     return "Seeded 14 days of data"
-
 
 # =========================
 # CLOVER OAUTH
