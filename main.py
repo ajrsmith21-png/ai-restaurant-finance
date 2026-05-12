@@ -163,25 +163,34 @@ def dashboard():
     needs_restaurant_setup = len(locations) == 0
 
     from models import DailySales
-from datetime import date
+    from datetime import date
 
-today = date.today()
+    today = date.today()
 
-today_data = DailySales.query.filter_by(
-    restaurant_id=locations[0].id if locations else None,
-    date=today
-).first()
+    today_data = DailySales.query.filter_by(
+        restaurant_id=locations[0].id if locations else None,
+        date=today
+    ).first()
 
-if today_data:
-    sales = today_data.sales
-    labor_cost = today_data.labor_cost
-    waste_cost = today_data.waste_cost
-    covers = today_data.covers
-else:
-    sales = 0
-    labor_cost = 0
-    waste_cost = 0
-    covers = 0
+    if today_data:
+        sales = today_data.sales
+        labor_cost = today_data.labor_cost
+        waste_cost = today_data.waste_cost
+        covers = today_data.covers
+    else:
+        sales = 0
+        labor_cost = 0
+        waste_cost = 0
+        covers = 0
+
+    return render_template(
+        "dashboard.html",
+        sales=sales,
+        labor_cost=labor_cost,
+        waste_cost=waste_cost,
+        covers=covers,
+        needs_restaurant_setup=needs_restaurant_setup
+    )
 
 # =========================
 # CALCULATIONS (OUTSIDE IF BLOCK)
