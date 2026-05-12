@@ -112,6 +112,63 @@ class Restaurant(db.Model):
         default=False
     )
 
+    clover_access_token = db.Column(
+        db.Text
+    )
+
+    clover_merchant_id = db.Column(
+        db.String(255)
+    )
+
+    last_sync_at = db.Column(
+        db.DateTime
+    )
+
+    created_at = db.Column(
+        db.DateTime,
+        default=datetime.utcnow
+    )
+
+# =========================
+class DailySales(db.Model):
+# =========================
+
+    id = db.Column(
+        db.Integer,
+        primary_key=True
+    )
+
+    restaurant_id = db.Column(
+        db.Integer,
+        db.ForeignKey("restaurant.id"),
+        nullable=False
+    )
+
+    date = db.Column(
+        db.Date,
+        nullable=False
+    )
+
+    sales = db.Column(
+        db.Float,
+        default=0
+    )
+
+    labor_cost = db.Column(
+        db.Float,
+        default=0
+    )
+
+    waste_cost = db.Column(
+        db.Float,
+        default=0
+    )
+
+    covers = db.Column(
+        db.Integer,
+        default=0
+    )
+
     created_at = db.Column(
         db.DateTime,
         default=datetime.utcnow

@@ -24,6 +24,7 @@ from werkzeug.security import (
 
 from models import db, User, AccessKey, Restaurant
 from urllib.parse import quote
+from datetime import date, timedelta
 
 app = Flask(__name__)
 
@@ -161,53 +162,90 @@ def dashboard():
 
     needs_restaurant_setup = len(locations) == 0
 
-    sales = 5200
-    labor_cost = 1450
-    waste_cost = 340
-    covers = 186
+    from models import DailySales
+from datetime import date
 
-    labor_percent = round((labor_cost / sales) * 100, 1)
-    waste_percent = round((waste_cost / sales) * 100, 1)
+today = date.today()
 
-    profit_impact_percent = round(
-        ((labor_cost + waste_cost) / sales) * 100,
-        1
-    )
+today_data = DailySales.query.filter_by(
+    restaurant_id=locations[0].id if locations else None,
+    date=today
+).first()
 
-    hourly_data = [
-        {
-            "hour": "11 AM",
-            "sales": 420,
-            "covers": 18,
-            "labor_cost": 110,
-            "sales_per_server_hour": 140,
-            "covers_per_server_hour": 6,
-            "labor_percent": 26
-        },
-        {
-            "hour": "12 PM",
-            "sales": 780,
-            "covers": 34,
-            "labor_cost": 160,
-            "sales_per_server_hour": 195,
-            "covers_per_server_hour": 8.5,
-            "labor_percent": 20
-        }
-    ]
+if today_data:
+    sales = today_data.sales
+    labor_cost = today_data.labor_cost
+    waste_cost = today_data.waste_cost
+    covers = today_data.covers
+else:
+    sales = 0
+    labor_cost = 0
+    waste_cost = 0
+    covers = 0
 
-    return render_template(
-        "dashboard.html",
-        sales=sales,
-        labor_cost=labor_cost,
-        waste_cost=waste_cost,
-        covers=covers,
-        labor_percent=labor_percent,
-        waste_percent=waste_percent,
-        profit_impact_percent=profit_impact_percent,
-        hourly_data=hourly_data,
-        needs_restaurant_setup=needs_restaurant_setup,
-        active_page="dashboard"
-    )
+# =========================
+# CALCULATIONS (OUTSIDE IF BLOCK)
+# =========================
+
+labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
+waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
+
+profit_impact_percent = round(
+    ((labor_cost + waste_cost) / sales) * 100,
+    1
+) if sales else 0
+
+# =========================
+# HOURLY DATA (TEMP SIMPLIFIED)
+# =========================
+
+hourly_records = DailySales.query.filter_by(
+    restaurant_id=locations[0].id if locations else None,
+    date=today
+).all()
+
+hourly_data = []
+
+for record in hourly_records:
+
+    hourly_data.append({
+        "hour": "Day Summary",
+        "sales": record.sales,
+        "covers": record.covers,
+        "labor_cost": record.labor_cost,
+        "sales_per_server_hour": round(record.sales / 8, 2) if record.sales else 0,
+        "covers_per_server_hour": round(record.covers / 8, 2) if record.covers else 0,
+        "labor_percent": round((record.labor_cost / record.sales) * 100, 1) if record.sales else 0
+    })
+
+# 👇 ADD THIS RIGHT HERE
+seven_day_data = []
+
+for i in range(7):
+
+    day = today - timedelta(days=i)
+
+    day_data = DailySales.query.filter_by(
+        restaurant_id=locations[0].id if locations else None,
+        date=day
+    ).first()
+
+    if day_data:
+        seven_day_data.append({
+            "date": str(day),
+            "sales": day_data.sales,
+            "labor_cost": day_data.labor_cost,
+            "waste_cost": day_data.waste_cost,
+            "covers": day_data.covers
+        })
+    else:
+        seven_day_data.append({
+            "date": str(day),
+            "sales": 0,
+            "labor_cost": 0,
+            "waste_cost": 0,
+            "covers": 0
+        })
 
 
 @app.route("/settings")
@@ -295,6 +333,43 @@ def labour_tracking():
 @login_required
 def reports():
     return render_template("reports.html", active_page="reports")
+
+
+@app.route("/seed-data")
+@login_required
+def seed_data():
+
+    from models import DailySales
+    from datetime import date, timedelta
+
+    today = date.today()
+
+    # create 14 days of fake data
+    for i in range(14):
+
+        day = today - timedelta(days=i)
+
+        entry = DailySales(
+                restaurant = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).first()
+
+    if not restaurant:
+        return "No restaurant found for this user"
+
+    restaurant_id = restaurant.id
+            date=day,
+            sales=round(4000 + (i * 120), 2),
+            labor_cost=round(1200 + (i * 40), 2),
+            waste_cost=round(200 + (i * 10), 2),
+            covers=round(140 + (i * 5))
+        )
+
+        db.session.add(entry)
+
+    db.session.commit()
+
+    return "Seeded 14 days of data"
 
 
 # =========================
