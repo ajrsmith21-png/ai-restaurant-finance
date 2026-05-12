@@ -130,8 +130,10 @@ class Restaurant(db.Model):
     )
 
 # =========================
-class DailySales(db.Model):
+# DAILY SALES MODEL
 # =========================
+
+class DailySales(db.Model):
 
     id = db.Column(
         db.Integer,
@@ -173,3 +175,5 @@ class DailySales(db.Model):
         db.DateTime,
         default=datetime.utcnow
     )
+
+

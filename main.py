@@ -22,7 +22,7 @@ from werkzeug.security import (
     check_password_hash
 )
 
-from models import db, User, AccessKey, Restaurant
+from models import db, User, AccessKey, Restaurant, DailySales
 from urllib.parse import quote
 from datetime import date, timedelta
 
