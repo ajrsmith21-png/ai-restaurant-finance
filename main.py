@@ -201,15 +201,6 @@ def dashboard():
     )
 
 # =========================
-# CALCULATIONS (OUTSIDE IF BLOCK)
-# =========================
-
-profit_impact_percent = round(
-    ((labor_cost + waste_cost) / sales) * 100,
-    1
-) if sales else 0
-
-# =========================
 # HOURLY DATA (TEMP SIMPLIFIED)
 # =========================
 
