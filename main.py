@@ -172,7 +172,7 @@ def dashboard():
         date=today
     ).first()
 
-        if today_data:
+    if today_data:
         sales = today_data.sales
         labor_cost = today_data.labor_cost
         waste_cost = today_data.waste_cost
