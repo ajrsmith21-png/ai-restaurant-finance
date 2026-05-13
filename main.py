@@ -172,7 +172,7 @@ def dashboard():
         date=today
     ).first()
 
-    if today_data:
+        if today_data:
         sales = today_data.sales
         labor_cost = today_data.labor_cost
         waste_cost = today_data.waste_cost
@@ -182,6 +182,10 @@ def dashboard():
         labor_cost = 0
         waste_cost = 0
         covers = 0
+
+    labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
+    waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
+
 
     return render_template(
         "dashboard.html",
@@ -195,9 +199,6 @@ def dashboard():
 # =========================
 # CALCULATIONS (OUTSIDE IF BLOCK)
 # =========================
-
-labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
-waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
 
 profit_impact_percent = round(
     ((labor_cost + waste_cost) / sales) * 100,
