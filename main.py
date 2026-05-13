@@ -191,67 +191,68 @@ def dashboard():
         1
     ) if sales else 0
 
+    # =========================
+    # HOURLY DATA (TEMP SIMPLIFIED)
+    # =========================
+
+    hourly_records = DailySales.query.filter_by(
+        restaurant_id=locations[0].id if locations else None,
+        date=today
+    ).all()
+
+    hourly_data = []
+
+    for record in hourly_records:
+
+        hourly_data.append({
+            "hour": "Day Summary",
+            "sales": record.sales,
+            "covers": record.covers,
+            "labor_cost": record.labor_cost,
+            "sales_per_server_hour": round(record.sales / 8, 2) if record.sales else 0,
+            "covers_per_server_hour": round(record.covers / 8, 2) if record.covers else 0,
+            "labor_percent": round((record.labor_cost / record.sales) * 100, 1) if record.sales else 0
+        })
+
+    # 👇 ADD THIS RIGHT HERE
+    seven_day_data = []
+
+    for i in range(7):
+
+        day = today - timedelta(days=i)
+
+        day_data = DailySales.query.filter_by(
+            restaurant_id=locations[0].id if locations else None,
+            date=day
+        ).first()
+
+        if day_data:
+            seven_day_data.append({
+                "date": str(day),
+                "sales": day_data.sales,
+                "labor_cost": day_data.labor_cost,
+                "waste_cost": day_data.waste_cost,
+                "covers": day_data.covers
+            })
+        else:
+            seven_day_data.append({
+                "date": str(day),
+                "sales": 0,
+                "labor_cost": 0,
+                "waste_cost": 0,
+                "covers": 0
+            })
+
     return render_template(
         "dashboard.html",
         sales=sales,
         labor_cost=labor_cost,
         waste_cost=waste_cost,
         covers=covers,
-        needs_restaurant_setup=needs_restaurant_setup
+        needs_restaurant_setup=needs_restaurant_setup,
+        hourly_data=hourly_data,
+        seven_day_data=seven_day_data
     )
-
-# =========================
-# HOURLY DATA (TEMP SIMPLIFIED)
-# =========================
-
-hourly_records = DailySales.query.filter_by(
-    restaurant_id=locations[0].id if locations else None,
-    date=today
-).all()
-
-hourly_data = []
-
-for record in hourly_records:
-
-    hourly_data.append({
-        "hour": "Day Summary",
-        "sales": record.sales,
-        "covers": record.covers,
-        "labor_cost": record.labor_cost,
-        "sales_per_server_hour": round(record.sales / 8, 2) if record.sales else 0,
-        "covers_per_server_hour": round(record.covers / 8, 2) if record.covers else 0,
-        "labor_percent": round((record.labor_cost / record.sales) * 100, 1) if record.sales else 0
-    })
-
-# 👇 ADD THIS RIGHT HERE
-seven_day_data = []
-
-for i in range(7):
-
-    day = today - timedelta(days=i)
-
-    day_data = DailySales.query.filter_by(
-        restaurant_id=locations[0].id if locations else None,
-        date=day
-    ).first()
-
-    if day_data:
-        seven_day_data.append({
-            "date": str(day),
-            "sales": day_data.sales,
-            "labor_cost": day_data.labor_cost,
-            "waste_cost": day_data.waste_cost,
-            "covers": day_data.covers
-        })
-    else:
-        seven_day_data.append({
-            "date": str(day),
-            "sales": 0,
-            "labor_cost": 0,
-            "waste_cost": 0,
-            "covers": 0
-        })
-
 
 @app.route("/settings")
 @login_required
