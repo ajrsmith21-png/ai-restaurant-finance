@@ -163,7 +163,7 @@ def dashboard():
     needs_restaurant_setup = len(locations) == 0
 
     from models import DailySales
-    from datetime import date
+    from datetime import date, timedelta
 
     today = date.today()
 
@@ -415,7 +415,7 @@ def debug_add_sales():
 
     db.session.commit()
 
-    return "Added +500 sales"
+    return "Added +500 sales" agai
 
 # =========================
 # CLOVER OAUTH
