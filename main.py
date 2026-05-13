@@ -382,6 +382,41 @@ def seed_data():
 
     return "Seeded 14 days of data"
 
+@app.route("/debug/add-sales")
+@login_required
+def debug_add_sales():
+
+    locations = Restaurant.query.filter_by(owner_id=current_user.id).all()
+
+    if not locations:
+        return "No restaurant found"
+
+    today = date.today()
+
+    record = DailySales.query.filter_by(
+        restaurant_id=locations[0].id,
+        date=today
+    ).first()
+
+    if not record:
+        record = DailySales(
+            restaurant_id=locations[0].id,
+            date=today,
+            sales=0,
+            labor_cost=0,
+            waste_cost=0,
+            covers=0
+        )
+
+        db.session.add(record)
+
+    record.sales += 500
+    record.covers += 10
+
+    db.session.commit()
+
+    return "Added +500 sales"
+
 # =========================
 # CLOVER OAUTH
 # =========================
