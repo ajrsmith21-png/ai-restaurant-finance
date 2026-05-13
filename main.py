@@ -415,7 +415,7 @@ def debug_add_sales():
 
     db.session.commit()
 
-    return "Added +500 sales" agai
+    return "Added +500 sales"
 
 # =========================
 # CLOVER OAUTH
