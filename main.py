@@ -186,6 +186,10 @@ def dashboard():
     labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
     waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
 
+    profit_impact_percent = round(
+        ((labor_cost + waste_cost) / sales) * 100,
+        1
+    ) if sales else 0
 
     return render_template(
         "dashboard.html",
