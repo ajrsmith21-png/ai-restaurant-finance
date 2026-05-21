@@ -6,7 +6,8 @@ from flask import (
     render_template,
     request,
     redirect,
-    url_for
+    url_for,
+    session
 )
 
 from flask_login import (
@@ -168,13 +169,38 @@ def dashboard():
 
     needs_restaurant_setup = len(locations) == 0
 
+    restaurant_id = request.args.get("restaurant_id")
+
+    if restaurant_id:
+        try:
+            restaurant_id = int(restaurant_id)
+        except ValueError:
+            restaurant_id = None
+
+    if not restaurant_id:
+        restaurant_id = session.get("restaurant_id")
+
+    if not restaurant_id and locations:
+        restaurant_id = locations[0].id
+
+    selected_restaurant = next(
+        (r for r in locations if r.id == restaurant_id),
+        None
+    )
+
+    if selected_restaurant is None and locations:
+        selected_restaurant = locations[0]
+        session["restaurant_id"] = selected_restaurant.id
+    elif selected_restaurant:
+        session["restaurant_id"] = selected_restaurant.id
+
     from models import DailySales
     from datetime import date, timedelta
 
     today = date.today()
 
     today_data = DailySales.query.filter_by(
-        restaurant_id=locations[0].id if locations else None,
+        restaurant_id=selected_restaurant.id if selected_restaurant else None,
         date=today
     ).first()
 
@@ -201,24 +227,21 @@ def dashboard():
     # HOURLY DATA (TEMP SIMPLIFIED)
     # =========================
 
-    hourly_records = DailySales.query.filter_by(
-        restaurant_id=locations[0].id if locations else None,
-        date=today
-    ).all()
-
     hourly_data = []
 
-    for record in hourly_records:
+    if today_data:
+        hours = 12
 
-        hourly_data.append({
-            "hour": "Day Summary",
-            "sales": record.sales,
-            "covers": record.covers,
-            "labor_cost": record.labor_cost,
-            "sales_per_server_hour": round(record.sales / 8, 2) if record.sales else 0,
-            "covers_per_server_hour": round(record.covers / 8, 2) if record.covers else 0,
-            "labor_percent": round((record.labor_cost / record.sales) * 100, 1) if record.sales else 0
-        })
+        for i in range(hours):
+            hourly_data.append({
+                "hour": f"{i+1}:00",
+                "sales": round(today_data.sales / hours, 2),
+                "covers": round(today_data.covers / hours, 2),
+                "labor_cost": round(today_data.labor_cost / hours, 2),
+                "sales_per_server_hour": round(today_data.sales / hours, 2),
+                "covers_per_server_hour": round(today_data.covers / hours, 2),
+                "labor_percent": round((today_data.labor_cost / today_data.sales) * 100, 1) if today_data.sales else 0
+            })
 
     # 👇 ADD THIS RIGHT HERE
     seven_day_data = []
@@ -228,7 +251,7 @@ def dashboard():
         day = today - timedelta(days=i)
 
         day_data = DailySales.query.filter_by(
-            restaurant_id=locations[0].id if locations else None,
+            restaurant_id=selected_restaurant.id if selected_restaurant else None,
             date=day
         ).first()
 
