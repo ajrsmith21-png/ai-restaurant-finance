@@ -1,3 +1,5 @@
+import csv
+import io
 import requests
 import os
 
@@ -7,7 +9,8 @@ from flask import (
     request,
     redirect,
     url_for,
-    session
+    session,
+    abort
 )
 
 from flask_login import (
@@ -25,7 +28,68 @@ from werkzeug.security import (
 
 from models import db, User, AccessKey, Restaurant, DailySales
 from urllib.parse import quote
-from datetime import date, timedelta
+from datetime import date, timedelta, datetime
+
+
+def clean_money(value):
+    if value is None:
+        return 0.0
+
+    try:
+        cleaned = str(value).replace("$", "").replace(",", "").strip()
+        return float(cleaned) if cleaned else 0.0
+    except ValueError:
+        return 0.0
+
+
+def clean_percent(value):
+    if value is None:
+        return 0.0
+
+    try:
+        cleaned = str(value).replace("%", "").replace(" ", "").strip()
+        return round(float(cleaned), 2) if cleaned else 0.0
+    except ValueError:
+        return 0.0
+
+
+def clean_int(value):
+    if value is None:
+        return 0
+
+    try:
+        return int(float(str(value).strip()))
+    except (ValueError, TypeError):
+        return 0
+
+
+def clean_date(value):
+    if value is None:
+        return None
+
+    raw = str(value).strip()
+    if not raw:
+        return None
+
+    date_formats = [
+        "%Y-%m-%d",
+        "%m/%d/%Y",
+        "%m/%d/%y",
+        "%d-%m-%Y",
+        "%Y/%m/%d"
+    ]
+
+    for fmt in date_formats:
+        try:
+            return datetime.strptime(raw, fmt).date().isoformat()
+        except ValueError:
+            continue
+
+    try:
+        return date.fromisoformat(raw).isoformat()
+    except ValueError:
+        return None
+
 
 app = Flask(__name__)
 
@@ -169,6 +233,9 @@ def dashboard():
 
     needs_restaurant_setup = len(locations) == 0
 
+    if needs_restaurant_setup:
+        return redirect(url_for("setup_restaurant"))
+
     restaurant_id = request.args.get("restaurant_id")
 
     if restaurant_id:
@@ -180,16 +247,18 @@ def dashboard():
     if not restaurant_id:
         restaurant_id = session.get("restaurant_id")
 
-    if not restaurant_id and locations:
-        restaurant_id = locations[0].id
+    first_location = next(iter(locations), None)
+
+    if not restaurant_id and first_location:
+        restaurant_id = first_location.id
 
     selected_restaurant = next(
         (r for r in locations if r.id == restaurant_id),
         None
     )
 
-    if selected_restaurant is None and locations:
-        selected_restaurant = locations[0]
+    if selected_restaurant is None and first_location:
+        selected_restaurant = first_location
         session["restaurant_id"] = selected_restaurant.id
     elif selected_restaurant:
         session["restaurant_id"] = selected_restaurant.id
@@ -308,6 +377,42 @@ def dashboard():
         seven_day_data=seven_day_data
     )
 
+@app.route("/setup-restaurant", methods=["GET", "POST"])
+@login_required
+def setup_restaurant():
+
+    locations = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    if locations:
+        return redirect(url_for("dashboard"))
+
+    if request.method == "POST":
+        restaurant_name = request.form.get("restaurant_name")
+        address = request.form.get("address")
+
+        restaurant = Restaurant(
+            owner_id=current_user.id,
+            restaurant_name=restaurant_name or "",
+            address=address or ""
+        )
+
+        db.session.add(restaurant)
+        db.session.commit()
+
+        session["restaurant_id"] = restaurant.id
+        return redirect(url_for("dashboard"))
+
+    return """
+    <h1>Set Up Your Restaurant</h1>
+    <form method="post">
+      <label>Name: <input name="restaurant_name" type="text" required /></label><br/>
+      <label>Address: <input name="address" type="text" /></label><br/>
+      <button type="submit">Create Restaurant</button>
+    </form>
+    """
+
 @app.route("/add-sales", methods=["GET", "POST"])
 @login_required
 def add_sales():
@@ -318,16 +423,18 @@ def add_sales():
 
     restaurant_id = session.get("restaurant_id")
 
-    if not restaurant_id and locations:
-        restaurant_id = locations[0].id
+    first_location = next(iter(locations), None)
+
+    if not restaurant_id and first_location:
+        restaurant_id = first_location.id
 
     selected_restaurant = next(
         (r for r in locations if r.id == restaurant_id),
         None
     )
 
-    if selected_restaurant is None and locations:
-        selected_restaurant = locations[0]
+    if selected_restaurant is None and first_location:
+        selected_restaurant = first_location
         session["restaurant_id"] = selected_restaurant.id
 
     if not selected_restaurant:
@@ -395,6 +502,86 @@ def add_sales():
       <button type="submit">Save</button>
     </form>
     """
+
+@app.route("/upload-sales", methods=["POST"])
+@login_required
+def upload_sales():
+
+    csv_file = request.files.get("file")
+    if not csv_file or csv_file.filename == "":
+        return redirect(url_for("dashboard"))
+
+    locations = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    restaurant_id = session.get("restaurant_id")
+    first_location = next(iter(locations), None)
+
+    if not restaurant_id and first_location:
+        restaurant_id = first_location.id
+
+    selected_restaurant = next(
+        (r for r in locations if r.id == restaurant_id),
+        None
+    )
+
+    if selected_restaurant is None and first_location:
+        selected_restaurant = first_location
+        session["restaurant_id"] = selected_restaurant.id
+
+    if not selected_restaurant:
+        return redirect(url_for("dashboard"))
+
+    try:
+        raw_data = csv_file.read().decode("utf-8-sig")
+    except Exception:
+        return redirect(url_for("dashboard"))
+
+    reader = csv.DictReader(io.StringIO(raw_data))
+    expected_headers = ["date", "sales", "labor_cost", "waste_cost", "covers"]
+    headers = [h.strip().lower() for h in (reader.fieldnames or [])]
+    if headers != expected_headers:
+        print(f"Rejected CSV with invalid headers: {headers}")
+        return redirect(url_for("dashboard"))
+
+    row_number = 1
+    for row in reader:
+        row_number += 1
+
+        date_value = clean_date(row.get("date"))
+        sales_value = clean_money(row.get("sales"))
+        labor_cost_value = clean_money(row.get("labor_cost"))
+        waste_cost_value = clean_money(row.get("waste_cost"))
+        covers_value = clean_int(row.get("covers"))
+
+        if not date_value:
+            print(f"Skipped invalid row {row_number}: missing or invalid date: {row}")
+            continue
+
+        record = DailySales.query.filter_by(
+            restaurant_id=selected_restaurant.id,
+            date=date_value
+        ).first()
+
+        if not record:
+            record = DailySales(
+                restaurant_id=selected_restaurant.id,
+                date=date_value,
+                sales=sales_value,
+                labor_cost=labor_cost_value,
+                waste_cost=waste_cost_value,
+                covers=covers_value
+            )
+            db.session.add(record)
+        else:
+            record.sales = sales_value
+            record.labor_cost = labor_cost_value
+            record.waste_cost = waste_cost_value
+            record.covers = covers_value
+
+    db.session.commit()
+    return redirect(url_for("dashboard"))
 
 @app.route("/settings")
 @login_required
@@ -527,19 +714,21 @@ def debug_add_sales():
 
     locations = Restaurant.query.filter_by(owner_id=current_user.id).all()
 
-    if not locations:
+    first_location = next(iter(locations), None)
+
+    if not first_location:
         return "No restaurant found"
 
     today = date.today()
 
     record = DailySales.query.filter_by(
-        restaurant_id=locations[0].id,
+        restaurant_id=first_location.id,
         date=today
     ).first()
 
     if not record:
         record = DailySales(
-            restaurant_id=locations[0].id,
+            restaurant_id=first_location.id,
             date=today,
             sales=0,
             labor_cost=0,
@@ -555,7 +744,61 @@ def debug_add_sales():
     db.session.commit()
 
     return "Added +500 sales"
+@app.route("/dev/simulate-day")
+@login_required
+def dev_simulate_day():
 
+    allow_dev = app.debug or os.getenv("DEV_SIMULATE_ENABLED") == "1"
+    if not allow_dev:
+        abort(404)
+
+    locations = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    restaurant_id = session.get("restaurant_id")
+    first_location = next(iter(locations), None)
+
+    if not restaurant_id and first_location:
+        restaurant_id = first_location.id
+
+    selected_restaurant = next(
+        (r for r in locations if r.id == restaurant_id),
+        None
+    )
+
+    if selected_restaurant is None and first_location:
+        selected_restaurant = first_location
+        session["restaurant_id"] = selected_restaurant.id
+
+    if not selected_restaurant:
+        return redirect(url_for("dashboard"))
+
+    today = date.today()
+
+    record = DailySales.query.filter_by(
+        restaurant_id=selected_restaurant.id,
+        date=today
+    ).first()
+
+    if not record:
+        record = DailySales(
+            restaurant_id=selected_restaurant.id,
+            date=today,
+            sales=1000,
+            labor_cost=300,
+            waste_cost=50,
+            covers=80
+        )
+        db.session.add(record)
+    else:
+        record.sales = 1000
+        record.labor_cost = 300
+        record.waste_cost = 50
+        record.covers = 80
+
+    db.session.commit()
+    return redirect(url_for("dashboard"))
 # =========================
 # CLOVER OAUTH
 # =========================
