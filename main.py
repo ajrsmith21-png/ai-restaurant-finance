@@ -199,71 +199,96 @@ def dashboard():
 
     today = date.today()
 
-    today_data = DailySales.query.filter_by(
-        restaurant_id=selected_restaurant.id if selected_restaurant else None,
-        date=today
-    ).first()
+    if selected_restaurant:
+        today_data = DailySales.query.filter_by(
+            restaurant_id=selected_restaurant.id,
+            date=today
+        ).first()
 
-    if today_data:
-        sales = today_data.sales
-        labor_cost = today_data.labor_cost
-        waste_cost = today_data.waste_cost
-        covers = today_data.covers
+        if today_data:
+            sales = today_data.sales
+            labor_cost = today_data.labor_cost
+            waste_cost = today_data.waste_cost
+            covers = today_data.covers
+        else:
+            sales = 0
+            labor_cost = 0
+            waste_cost = 0
+            covers = 0
+
+        labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
+        waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
+
+        profit_impact_percent = round(
+            ((labor_cost + waste_cost) / sales) * 100,
+            1
+        ) if sales else 0
+
+        hourly_data = []
+
+        hours = 12
+        for i in range(hours):
+            hourly_data.append({
+                "hour": f"{i+1}:00",
+                "sales": round(today_data.sales / hours, 2) if today_data else 0,
+                "covers": round(today_data.covers / hours, 2) if today_data else 0,
+                "labor_cost": round(today_data.labor_cost / hours, 2) if today_data else 0,
+                "sales_per_server_hour": round(today_data.sales / hours, 2) if today_data else 0,
+                "covers_per_server_hour": round(today_data.covers / hours, 2) if today_data else 0,
+                "labor_percent": round((today_data.labor_cost / today_data.sales) * 100, 1) if today_data and today_data.sales else 0
+            })
+
+        seven_day_data = []
+
+        for i in range(7):
+            day = today - timedelta(days=i)
+
+            day_data = DailySales.query.filter_by(
+                restaurant_id=selected_restaurant.id,
+                date=day
+            ).first()
+
+            if day_data:
+                seven_day_data.append({
+                    "date": str(day),
+                    "sales": day_data.sales,
+                    "labor_cost": day_data.labor_cost,
+                    "waste_cost": day_data.waste_cost,
+                    "covers": day_data.covers
+                })
+            else:
+                seven_day_data.append({
+                    "date": str(day),
+                    "sales": 0,
+                    "labor_cost": 0,
+                    "waste_cost": 0,
+                    "covers": 0
+                })
     else:
         sales = 0
         labor_cost = 0
         waste_cost = 0
         covers = 0
 
-    labor_percent = round((labor_cost / sales) * 100, 1) if sales else 0
-    waste_percent = round((waste_cost / sales) * 100, 1) if sales else 0
+        labor_percent = 0
+        waste_percent = 0
+        profit_impact_percent = 0
 
-    profit_impact_percent = round(
-        ((labor_cost + waste_cost) / sales) * 100,
-        1
-    ) if sales else 0
-
-    # =========================
-    # HOURLY DATA (TEMP SIMPLIFIED)
-    # =========================
-
-    hourly_data = []
-
-    if today_data:
-        hours = 12
-
-        for i in range(hours):
+        hourly_data = []
+        for i in range(12):
             hourly_data.append({
                 "hour": f"{i+1}:00",
-                "sales": round(today_data.sales / hours, 2),
-                "covers": round(today_data.covers / hours, 2),
-                "labor_cost": round(today_data.labor_cost / hours, 2),
-                "sales_per_server_hour": round(today_data.sales / hours, 2),
-                "covers_per_server_hour": round(today_data.covers / hours, 2),
-                "labor_percent": round((today_data.labor_cost / today_data.sales) * 100, 1) if today_data.sales else 0
+                "sales": 0,
+                "covers": 0,
+                "labor_cost": 0,
+                "sales_per_server_hour": 0,
+                "covers_per_server_hour": 0,
+                "labor_percent": 0
             })
 
-    # 👇 ADD THIS RIGHT HERE
-    seven_day_data = []
-
-    for i in range(7):
-
-        day = today - timedelta(days=i)
-
-        day_data = DailySales.query.filter_by(
-            restaurant_id=selected_restaurant.id if selected_restaurant else None,
-            date=day
-        ).first()
-
-        if day_data:
-            seven_day_data.append({
-                "date": str(day),
-                "sales": day_data.sales,
-                "labor_cost": day_data.labor_cost,
-                "waste_cost": day_data.waste_cost,
-                "covers": day_data.covers
-            })
-        else:
+        seven_day_data = []
+        for i in range(7):
+            day = today - timedelta(days=i)
             seven_day_data.append({
                 "date": str(day),
                 "sales": 0,
@@ -282,6 +307,94 @@ def dashboard():
         hourly_data=hourly_data,
         seven_day_data=seven_day_data
     )
+
+@app.route("/add-sales", methods=["GET", "POST"])
+@login_required
+def add_sales():
+
+    locations = Restaurant.query.filter_by(
+        owner_id=current_user.id
+    ).all()
+
+    restaurant_id = session.get("restaurant_id")
+
+    if not restaurant_id and locations:
+        restaurant_id = locations[0].id
+
+    selected_restaurant = next(
+        (r for r in locations if r.id == restaurant_id),
+        None
+    )
+
+    if selected_restaurant is None and locations:
+        selected_restaurant = locations[0]
+        session["restaurant_id"] = selected_restaurant.id
+
+    if not selected_restaurant:
+        return redirect(url_for("dashboard"))
+
+    today = date.today()
+
+    if request.method == "POST":
+        sales = request.form.get("sales") or 0
+        labor_cost = request.form.get("labor_cost") or 0
+        waste_cost = request.form.get("waste_cost") or 0
+        covers = request.form.get("covers") or 0
+
+        try:
+            sales = float(sales)
+        except ValueError:
+            sales = 0
+
+        try:
+            labor_cost = float(labor_cost)
+        except ValueError:
+            labor_cost = 0
+
+        try:
+            waste_cost = float(waste_cost)
+        except ValueError:
+            waste_cost = 0
+
+        try:
+            covers = float(covers)
+        except ValueError:
+            covers = 0
+
+        record = DailySales.query.filter_by(
+            restaurant_id=selected_restaurant.id,
+            date=today
+        ).first()
+
+        if not record:
+            record = DailySales(
+                restaurant_id=selected_restaurant.id,
+                date=today,
+                sales=sales,
+                labor_cost=labor_cost,
+                waste_cost=waste_cost,
+                covers=covers
+            )
+            db.session.add(record)
+        else:
+            record.sales = sales
+            record.labor_cost = labor_cost
+            record.waste_cost = waste_cost
+            record.covers = covers
+
+        db.session.commit()
+        return redirect(url_for("dashboard"))
+
+    return """
+    <h1>Add Sales</h1>
+    <form method="post">
+      <label>Sales: <input name="sales" type="number" step="0.01" /></label><br/>
+      <label>Labor Cost: <input name="labor_cost" type="number" step="0.01" /></label><br/>
+      <label>Waste Cost: <input name="waste_cost" type="number" step="0.01" /></label><br/>
+      <label>Covers: <input name="covers" type="number" step="1" /></label><br/>
+      <button type="submit">Save</button>
+    </form>
+    """
 
 @app.route("/settings")
 @login_required
