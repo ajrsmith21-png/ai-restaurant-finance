@@ -28,7 +28,10 @@ from datetime import date, timedelta
 
 app = Flask(__name__)
 
-app.config["SECRET_KEY"] = "change_this_later"
+app.config["SECRET_KEY"] = os.getenv("SECRET_KEY")
+
+if not app.config["SECRET_KEY"]:
+    raise ValueError("SECRET_KEY environment variable missing")
 
 # =========================
 # DATABASE CONFIG
