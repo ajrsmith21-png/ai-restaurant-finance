@@ -81,12 +81,12 @@ def clean_date(value):
 
     for fmt in date_formats:
         try:
-            return datetime.strptime(raw, fmt).date().isoformat()
+            return datetime.strptime(raw, fmt).date()
         except ValueError:
             continue
 
     try:
-        return date.fromisoformat(raw).isoformat()
+        return date.fromisoformat(raw)
     except ValueError:
         return None
 
@@ -263,16 +263,13 @@ def dashboard():
     elif selected_restaurant:
         session["restaurant_id"] = selected_restaurant.id
 
-    from models import DailySales
-    from datetime import date, timedelta
-
     today = date.today()
 
     if selected_restaurant:
         today_data = DailySales.query.filter_by(
             restaurant_id=selected_restaurant.id,
             date=today
-        ).first()
+        ).order_by(DailySales.id.desc()).first()
 
         if today_data:
             sales = today_data.sales
@@ -315,7 +312,7 @@ def dashboard():
             day_data = DailySales.query.filter_by(
                 restaurant_id=selected_restaurant.id,
                 date=day
-            ).first()
+            ).order_by(DailySales.id.desc()).first()
 
             if day_data:
                 seven_day_data.append({
@@ -509,7 +506,10 @@ def upload_sales():
 
     csv_file = request.files.get("file")
     if not csv_file or csv_file.filename == "":
-        return redirect(url_for("dashboard"))
+        return render_template(
+            "upload_sales.html",
+            error="No file selected. Please choose a CSV file."
+        )
 
     locations = Restaurant.query.filter_by(
         owner_id=current_user.id
@@ -531,21 +531,43 @@ def upload_sales():
         session["restaurant_id"] = selected_restaurant.id
 
     if not selected_restaurant:
-        return redirect(url_for("dashboard"))
+        return render_template(
+            "upload_sales.html",
+            error="No restaurant found. Please set up a restaurant first."
+        )
 
     try:
         raw_data = csv_file.read().decode("utf-8-sig")
-    except Exception:
-        return redirect(url_for("dashboard"))
+    except Exception as e:
+        print(f"File decode error: {str(e)}")
+        return render_template(
+            "upload_sales.html",
+            error="Unable to read file. Please ensure it is a valid CSV file."
+        )
 
     reader = csv.DictReader(io.StringIO(raw_data))
-    expected_headers = ["date", "sales", "labor_cost", "waste_cost", "covers"]
-    headers = [h.strip().lower() for h in (reader.fieldnames or [])]
-    if headers != expected_headers:
-        print(f"Rejected CSV with invalid headers: {headers}")
-        return redirect(url_for("dashboard"))
 
+    if not reader.fieldnames:
+        print("CSV file is empty or has no headers")
+        return render_template(
+            "upload_sales.html",
+            error="CSV file is empty or has no headers."
+        )
+
+    expected_headers = ["date", "sales", "labor_cost", "waste_cost", "covers"]
+    headers = [h.strip().lower() for h in reader.fieldnames]
+
+    if headers != expected_headers:
+        print(f"Rejected CSV with invalid headers. Expected: {expected_headers}, Got: {headers}")
+        return render_template(
+            "upload_sales.html",
+            error="Invalid file format. Required columns:\ndate,sales,labor_cost,waste_cost,covers"
+        )
+
+    uploaded_count = 0
+    skipped_count = 0
     row_number = 1
+
     for row in reader:
         row_number += 1
 
@@ -556,13 +578,14 @@ def upload_sales():
         covers_value = clean_int(row.get("covers"))
 
         if not date_value:
-            print(f"Skipped invalid row {row_number}: missing or invalid date: {row}")
+            print(f"Skipped row {row_number}: invalid or missing date. Data: {row}")
+            skipped_count += 1
             continue
 
         record = DailySales.query.filter_by(
             restaurant_id=selected_restaurant.id,
             date=date_value
-        ).first()
+        ).order_by(DailySales.id.desc()).first()
 
         if not record:
             record = DailySales(
@@ -580,8 +603,21 @@ def upload_sales():
             record.waste_cost = waste_cost_value
             record.covers = covers_value
 
+        uploaded_count += 1
+
     db.session.commit()
-    return redirect(url_for("dashboard"))
+
+    return render_template(
+        "upload_sales.html",
+        success=True,
+        uploaded_count=uploaded_count,
+        skipped_count=skipped_count
+    )
+
+@app.route("/upload-sales-page")
+@login_required
+def upload_sales_page():
+    return render_template("upload_sales.html")
 
 @app.route("/settings")
 @login_required
